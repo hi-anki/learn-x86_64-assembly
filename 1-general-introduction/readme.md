@@ -40,3 +40,32 @@
 + **Data Structures**? **Functions**? **D I Y. DO.IT.YOURSELF**
 
 You have got every raw material, and building anything is your responsibility.
+
+# Important Note
+Assembly is neither complex nor hard. 
+
+The problem with assembly is that it is hard at first, because there is no clear starting point.
+
+Once you start, you find everything deeply linked. You go about learning one thing and end up learning something else.
+
+Assembly is vast. It is not a collection of concepts. Every concept itself is collection of sub-concepts. And this itself is recursive.
+
+Every concept would be linked to something else. And that's how you obtain assembly.
+
+Every concept here is a fractal. Therefore, enjoy it. Don't try to force learn it.
+
+In this journey, concepts would be gradually introduced. But no one concept would be finished all at once. Because this is not possible, at least for me.
+
+You have to leave the methodology you have created internally while learning high-level languages. Because that's not how assembly operates.
+
+The path to progressive learning can never be left behind. If you do, I don't know if you will be able to go very far in it. That's the road to burnout.
+
+I have found these 2 rules to be extremely applicable.
+1. Don’t try to learn everything at once. Why?
+   + The more you will dive in, the more it will increase its depth.
+2. Avoid the urge to see everything there is to learn. Why?
+   + It's huge and complicated.
+
+Both of these lead to overwhelm and burnout.
+
+Learn progressively. Visit one concept multiple times with a new charm every single time, and keep the interest and love for assembly alive.
