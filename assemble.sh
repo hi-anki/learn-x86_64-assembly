@@ -17,3 +17,5 @@ as "$full_filename" -o "$filename.o" || { echo "Assembling failed"; exit 1; }
 ld "$filename.o" -o "$filename" || { echo "Linking failed"; exit 1; }
 
 ./"$filename"
+
+rm "$filename" "$filename".o
