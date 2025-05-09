@@ -2,18 +2,19 @@
 1. **Mnemonic:** The operation's name that the CPU is going to perform.
 2. **Operand:** The values passed to the operation to act on. Could be a register, intermediate or memory.
 3. **Instruction:** An operation that the CPU can execute. It includes the mnemonic and the operands.
-4. **Label:** A name given to a particular memory address in the asm code. 
+4. **Immediate**: An immediate is a constant value. Like `4`.
+5. **Label:** A name given to a particular memory address in the asm code. 
    + It is made letters, digits and underscore. 
    + A label must start with a letter or underscore.
    + A label must end with a colon.
    + It holds meaning for the assembler program, not the CPU.
-5. **Directive (or Pseudo-Instruction):** Instructions for the assembler program, not the machine. 
+6. **Directive (or Pseudo-Instruction):** Instructions for the assembler program, not the machine. 
    + They begin with a period.
    + Ex: `.section` creates section within the program.
-6. **Section:** The code is divided into multiple sections to organise the memory layout.
-7. **Comment:** Anything after a semi-colon (;) is ignored by the assembler and is meant for the programmer itself to understand what is happening.
-8. **Keyword:** In high-level languages, keywords are reserved words (like if, for, while). In assembly, the idea of keywords overlaps with mnemonics and directives.
-9. **Symbol:** Any names representing an address — typically labels or variable names. These are resolved by the assembler/linker.
+7. **Section:** The code is divided into multiple sections to organise the memory layout.
+8. **Comment:** Anything after a semi-colon (;) is ignored by the assembler and is meant for the programmer itself to understand what is happening.
+9. **Keyword:** In high-level languages, keywords are reserved words (like if, for, while). In assembly, the idea of keywords overlaps with mnemonics and directives.
+10. **Symbol:** Any names representing an address — typically labels or variable names. These are resolved by the assembler/linker.
 
 ## Memory/Pointer Dereferencing
 It refers to obtaining the actual value stored at a memory location.
