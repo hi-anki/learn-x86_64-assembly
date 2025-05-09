@@ -14,15 +14,34 @@
 7. **Comment:** Anything after a semi-colon (;) is ignored by the assembler and is meant for the programmer itself to understand what is happening.
 8. **Keyword:** In high-level languages, keywords are reserved words (like if, for, while). In assembly, the idea of keywords overlaps with mnemonics and directives.
 9. **Symbol:** Any names representing an address — typically labels or variable names. These are resolved by the assembler/linker.
-10. **Memory Dereferencing**: Thise refers to obtaining the actual value stored at a memory location.
-11. **Type Specifier**: Type specifiers are used to explicitly tell the assembler what size of data you’re working with when accessing memory.
-    + They help ensure that the assembler knows how much data to read or write, especially when dealing with different data types or sizes.
-    + Common type specifiers include:
-      1. `byte ptr`: load only 1-byte from the memory address.
-      2. `word ptr`: load a word or 2-bytes (in x86_64) from the memory address.
-      3. `dword ptr`: load a double word or 4-bytes from the memory address.
-      4. `qword ptr`: load a quad word or 8-bytes from the memory address.
-    + They are particularly important (actually necessary) when working with memory operands and dereferncing pointers because x86-64 architecture can handle different sizes of data (like bytes, words, double words, etc.).
+
+## Memory/Pointer Dereferencing
+It refers to obtaining the actual value stored at a memory location.
+
+This is done using [] or square brackets.
+
+```
+.section .bss
+  buffer: .skip 2
+
+.section .text
+mov rax, [buffer]
+```
+> Here, `[buffer]` means the actual value stored at the memory address the label "buffer" is pointing to
+
+## Type Specifier
+
+Type specifiers are used to explicitly tell the assembler what size of data you’re working with when accessing memory.
+
+They help ensure that the assembler knows how much data to read or write, especially when dealing with different data types or sizes.
+
+Common type specifiers include:
+  1. `byte ptr`: load only 1-byte from the memory address.
+  2. `word ptr`: load a word or 2-bytes (in x86_64) from the memory address.
+  3. `dword ptr`: load a double word or 4-bytes from the memory address.
+  4. `qword ptr`: load a quad word or 8-bytes from the memory address.
+
+They are particularly important (actually necessary) when working with memory operands and dereferncing pointers because x86-64 architecture can handle different sizes of data (like bytes, words, double words, etc.).
 
 # Anatomy Of An Assembly Program
 ## 1. Section
