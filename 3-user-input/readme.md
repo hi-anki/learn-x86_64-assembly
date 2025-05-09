@@ -49,5 +49,3 @@ With that in mind, read syscall would look like: `read(fd, buffer, bytes)
   ```
 
 + Now it will work perfect.
-
-brit / ame
