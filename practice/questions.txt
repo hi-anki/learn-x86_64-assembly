@@ -1,0 +1,1 @@
+Ques1: Write a program to take user input of name and greet that person.
