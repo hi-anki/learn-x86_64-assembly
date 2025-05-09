@@ -90,3 +90,7 @@ They are particularly important (actually necessary) when working with memory op
 
 ## System Calls (or Syscalls)
 + Often there will be times when we'll require to interact with the operating system for things like printing to the screen, reading user input, or managing files. This is done via system calls (or interrupts, in older systems).
+
+----
+
+Always leave an empty line at end. This gracefully marks the end of assembly code. Otherwise, you'll get a warning by the assembler.
