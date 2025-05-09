@@ -22,7 +22,7 @@
       2. `word ptr`: load a word or 2-bytes (in x86_64) from the memory address.
       3. `dword ptr`: load a double word or 4-bytes from the memory address.
       4. `qword ptr`: load a quad word or 8-bytes from the memory address.
-    + + They are particularly important (actually necessary) when working with memory operands and dereferncing pointers because x86-64 architecture can handle different sizes of data (like bytes, words, double words, etc.).
+    + They are particularly important (actually necessary) when working with memory operands and dereferncing pointers because x86-64 architecture can handle different sizes of data (like bytes, words, double words, etc.).
 
 # Anatomy Of An Assembly Program
 ## 1. Section
