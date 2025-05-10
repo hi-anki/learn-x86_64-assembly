@@ -6,43 +6,6 @@
 + Lets be honest, assembly does requires the knowledge of CPU and memory, which most of use don't have. But we can acquire it as we move on. Lets start.
 ----
 
-# Number System Refresher
-
-Primarily we have 4 number systems. They are: binary, octal, decimal and hexadecimal
-
-## Binary Number System
-
-+ It is a base-2 (2^1) system.
-+ It contains only 0 and 1. They are called bits.
-+ 0 means OFF/FALSE
-+ 1 means ON/TRUE
-
-## Octal Number System
-
-+ It is base-8 (2^3) system.
-+ It contains digits between 0-7.
-+ It takes 3-bits to be represented.
-
-## Decimal Number System
-
-+ It is base-10 system.
-+ It contains digits between 0-9.
-
-## Hexadecimal Number System
-
-+ It is base-16 (2^4) system.
-+ It contains digits between 0-9 and A-F.
-+ It takes 4-bits to be represented.
-
-## Bit, Byte Havoc
-+ Bits include 0, 1.
-+ 1 Byte = 8-bits
-+ 1 Byte can represent numbers between 0-255. 
-+ "Zero" by 00000001 and "One" 255 by 11111111.
-+ 2 Bytes can represent numbers between 0-65536.
-+ 4 Bytes can represent numbers between 0-4.29b
-----
-
 # CPU
 + The CPU reads instructions from the memory *one at a time* and executes them. This is known as the **fetch-execute** cycle.
 + The core elements of the CPU includes:
