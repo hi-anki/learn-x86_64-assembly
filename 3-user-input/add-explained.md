@@ -1,0 +1,23 @@
+# Add Two Numbers
+
+1. We are subtracting '0' from the input of numbers. Why?
+  - When we read user input, it is stored in raw-bytes, which is their ASCII value (in hexadecimal representation).
+  - Suppose we entered 5. It would be stored as 0x35, because 5 is equal to 35 in base-16. 0x represents that it is hex.
+  - But we have entered 5, not 35. This would cause problems in how arithmetics would deal with it.
+  - Therefore, subtracting 30 from a digit would convert it into integer.
+
+  - Why we have used '0' and not literal 0?
+    - It would do nothing, because it is an immediate.
+    - '0' on the other hand is an ASCII character so it will get stored as 0x30, the same as our input number and then we subtract it from 0x35 to get 0x05.
+    - Where 0x05 is just a binary number, 00000101
+
+2. What is the `movzx` mnemonic?
+   - It stands for "move with zero extend".
+   - It means, move a smaller value in a large register and set the upper bits to zero.
+
+    - Our numbers are composed of 1 byte only. But the registers we are using can hold up to 64-bits or 8 bytes.
+    - Therefore, the rest of the bits have to be zero.
+    - Doing `mov rbx, byte ptr [num1]` is risky because you get the 8-bit value but the rest might be garbage.
+    - `movzx` ensures there is no chance of garbage value in the upper bits.
+
+3. `add rbx, rcx` is equalivalent to `rbx = rbx + rcx`. This way, we have lost the original value in rbx, which is our first number.
