@@ -112,7 +112,7 @@ len = . - msg
 ----
 ### Understanding The `write` Syscall
 ```
-write(fd, buffer, count)
+`write(fd=rdi, buffer=rsi, buffer_len=rdx)`
 ```
 
 + The write syscall is used to output data to a file descriptor.
@@ -125,7 +125,7 @@ write(fd, buffer, count)
   + 2 is used for `stderr`.
 
 + **Argument 2**: Pointer to the buffer that contains the data to be written.
-  + This defines what to write.
+  + This defines where is the item that has to be written.
   + This goes in `rsi` register.
 
 + **Argument 3**: Length of the buffer.
