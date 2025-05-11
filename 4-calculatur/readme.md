@@ -112,7 +112,7 @@ Here comes the problem. If the **result > 64-bit**, what will happen? The bits f
 | `imul`      | 2-operand          | reg             |
 | `imul`      | 3-operand          | reg             |
 
-## Setting CPU Flags
+### Setting CPU Flags
 
 Now multiplication is done and results have been obtained. It must be finished? Not really!
 
