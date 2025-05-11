@@ -14,8 +14,8 @@
   op_len = . - op_msg_1
   op_msg_2: .ascii "Enter number 2: "
 
-  res_plus: .ascii "Num1 + Num2 = "
-  res_len = . - res_plus
+  res: .ascii "Num1 - Num2 = "
+  res_len = . - res
 
 .section .text
   .global _start
@@ -71,7 +71,7 @@
   # Step 9: Display result msg
     mov rax, 1
     mov rdi, 1
-    mov rsi, offset res_plus
+    mov rsi, offset res
     mov rdx, res_len
     syscall
 
