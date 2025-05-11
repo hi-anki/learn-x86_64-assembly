@@ -5,7 +5,6 @@
 .section .bss
   num1: .skip 2
   num2: .skip 2
-  result: .skip 2
 
 .section .data
   welcome_msg: .ascii "Welcome To x86_64 Calculator\n"
@@ -68,8 +67,8 @@
     mul rcx
 
   # Step 8: Convert the result from Integer to ASCII
-    add rax, '0'
-    mov [result], al
+    add al, '0'
+    mov bl, al
 
   # Step 9: Display result msg
     mov rax, 1
@@ -81,9 +80,11 @@
   # Step 10: Display resultant digit
     mov rax, 1
     mov rdi, 1
-    mov rsi, offset result
+    mov [rsp], bl
+    mov rsi, rsp
     mov rdx, 1
     syscall
+    add rsp, 8
 
   # Exit
     mov rax, 60
