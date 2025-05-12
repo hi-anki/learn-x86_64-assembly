@@ -1,6 +1,12 @@
 # Add Two Numbers
 
-1. We are subtracting '0' from the input of numbers. Why?
+1. We have kept the buffer size to be 2. Why?
+  + When we type 9 and press enter, the terminal sends [0x39, 0x0a] as the input.
+  + 0x39 is the hexdecimal representation of the ASCII literal 9.
+  + 0x0a is the ASCII representation of Line Feed (`LF`). Line Feed or newline character (`\n`) is what that is passed once we press `ENTER`. It is how the input is finalised and submitted.
+  + This is the reason why we need to reserve 2-bytes. One for the input and the other for its finalization.
+
+2. We are subtracting '0' from the input of numbers. Why?
   - When we read user input, it is stored in raw-bytes, which is their ASCII value (in hexadecimal representation).
   - Suppose we entered 5. It would be stored as 0x35, because 5 is equal to 35 in base-16. 0x represents that it is hex.
   - But we have entered 5, not 35. This would cause problems in how arithmetics would deal with it.
