@@ -146,3 +146,127 @@ We have learned in elementary school that we start from right hand and go toward
 Recently, we have seen binary representation of numbers and we know that the MSB lies in the left side, which represents the highest value a bit can hold in that combination.
 
 This makes it clear that upper bits are written left hand side while the lower bits are written on the right hand side. This explains why it is RDX:RAX and not RAX:RDX
+
+### A Curiosity Question
+What if the magnitude of the operands themselves exceed the 64-bit mark?
+  - In that case, you have to do the work manually.
+  - That's why libraries like GMP, which stands for "GNU Multiple Precision Arithmetic Library" exist.
+
+  - But realistically, we don't have to go there.
+  - 64-bits can represent approximately **~18 quintillion** unsigned integers. And **~9 quintillion** signed integers.
+
+## Division
+
+In multiplication, RAX was default as the first argument, at least in unsigned multiplication. You can change that in signed multiplication thou. And the result goes in the accumulator pair or RDX:RAX
+
+Division follows a different methodology.
+
+First, lets clarify division terminology as it has been a long time using them.
+  + Diviend, the numerator, or the number that is getting divided.
+  + Divisor, the denominator, or the number that is dividing the dividend.
+  + Quotient, the result, or integer result without any floating point decimals for exactness.
+  + Remainder, the value which didn't got divided.
+
+The dividend here is defaulted to the accumulator pair (RDX:RAX). This implies that division is implicitly considered twice the word-size, in assembly. For example, Division on a 64-bit CPU will use 128-bit long dividend.
+
+The divisor is a 64-bit operand. It can be a register or a memory location.
+
+The quotient goes into RAX while the remainder goes into RDX.
+
+Reference Table:
+
+| Operand Size | Dividend Location | Quotient Location | Remainder Location |
+| ------------ | ----------------- | ----------------- | ------------------ |
+| 8-bit        | `AX`              | `AL`              | `AH`               |
+| 16-bit       | `DX:AX`           | `AX`              | `DX`               |
+| 32-bit       | `EDX:EAX`         | `EAX`             | `EDX`              |
+| 64-bit       | `RDX:RAX`         | `RAX`             | `RDX`              |
+
+### Zero Extension
+
+It is the process of zeroing the upper bits of a register before division to avoid garbage values ruining the result.
+
+It is done by xoring the register.
+```
+xor rdx, rdx
+```
+
+### Unsigned Division (`div`)
+
+`div` divides the value stored in the accumulator pair, by the operand. 
+  - And the same logic is applied here.
+  - Lower bits of dividend in RAX and higher bits in RDX.
+
+Therefore, to set the dividend (numerator), we have to set the `rax` register.
+
+Remember how many unsigned combinations can 4-byte (or 32-bits) contain? 
+  - It is 4.29b+
+  - It is ~18+ quintillion for 64-bits.
+  - This is enough for regular mathematics.
+
+Therefore, set rax and xor rdx. Simple
+
+To divide, we write:
+```
+div dr_reg
+```
+
+Example:
+```s
+mov rax, 10
+xor rdx, rdx
+div 2
+```
+> Done.
+
+Meaning, `div rcx` means divide RDX:RAX by RCX.
+
+### Sign Extension
+Before we can do signed division, we need to understand sign-extension.
+
+We have performed type conversion in high level languages.
+  - We wite float besides an int and the integer value magically becomes a float value.
+  - Here, the magnitude doesn't changes, the container size changes. Earlier it was 4-bit, now 8-bit. The value still remains the same. Meaning, upper bits are added to it somehow.
+
+  - Generally, we convert smaller values into larger holdings. Why?
+  - Because this operation is readily possible. As a small thing can easily fit inside a larger container. But the reverse might not be true.
+
+But machines don't understand types. They understand bit-size.
+
+Converting an int from float on 64-bit CPU in C means we are transforming a 4-bit value to an 8-bit value.
+
+Now comes the problem! If this transformation is not done properly, the actual value will be lost. And this problem is only with signed digits because they have the sign bit (MSB) set in them.
+
+Solution? **Sign Extension**.
+
+In simplest terms, is the correct process of transforming a smaller value into a larger value, which ensures that the integrity of the value is not lost.
+
+Accurately, sign extension is the process of copying the sign bit of a smaller signed value into the higher bits of a larger register or value.
+
+Now how it is done?
+
+| Mnemonic | Meaning                    | Sign-extends from | To        | Used Before             |
+| -------- | -------------------------- | ----------------- | --------- | ----------------------- |
+| `cwd`    | Convert Word to Doubleword | `AX`              | `DX:AX`   | 16-bit `idiv`  |
+| `cdq`    | Convert Double to Quadword | `EAX`             | `EDX:EAX` | 32-bit `idiv` |
+| `cqo`    | Convert Quad to Octoword   | `RAX`             | `RDX:RAX` | 64-bit `idiv` |
+
+These are all one-operand instructions — they read from the lower register and sign-extend into the upper half of the dividend pair.
+
+### Signed Division (`idiv`)
+
+Syntax:
+```s
+idiv reg
+idiv mem
+```
+> idiv means full (signed) integer divide
+
+If either the dividend or the divisor is negative, idiv handles the sign.
+
+### And Finally, The Almighty, Division Error
+If the quotient exceedes the 64-bit mark or you decided to divide by zero, you are gonna greeted with a `divide error exception`
+
+There’s no CF or OF to catch this — it's a full exception, so you must manage operands carefully.
+
+To divide very large numbers and get larger quotients, you must write a "*multi-precision division routine*", example: GMP.
