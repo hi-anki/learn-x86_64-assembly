@@ -21,3 +21,4 @@
     - `movzx` ensures there is no chance of garbage value in the upper bits.
 
 3. `add rbx, rcx` is equalivalent to `rbx = rbx + rcx`. This way, we have lost the original value in rbx, which is our first number.
+4. Also, this is only applicable for single digit integers and single digit results. What about others?
