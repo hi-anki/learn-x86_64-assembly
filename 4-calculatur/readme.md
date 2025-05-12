@@ -270,3 +270,25 @@ If the quotient exceedes the 64-bit mark or you decided to divide by zero, you a
 There’s no CF or OF to catch this — it's a full exception, so you must manage operands carefully.
 
 To divide very large numbers and get larger quotients, you must write a "*multi-precision division routine*", example: GMP.
+
+# Burning Question
+
+Great. We have done very basic arithmetics now.
+
+But our programs lack the capability to act as standalone calculators.
+  - They don't support multi-digit inputs and multi-digit outputs.
+  - They don't support any interactivity by asking the user to input the operation (+, -, /, *......)
+
+Yes. They do lack these capabilities. And that's how it is.
+
+Again, I have to reinforce this so that it get embedded in our psyche that assembly is not a high language. There are no built-in constructs.
+  - What was normal in high level languages, is definitely not normal in assembly.
+  - Moving progressively is the mantra.
+
+To answer the question, we need the knowledge of control flow and iteration, to give our program such capability.
+
+And this is precisely the next thing we are going to do.
+
+But one thing to keep in mind, we are definitely going to learn control flow and iteratio, but that's not the only thing we will learn. That's how assembly is. We will learn a ton of other things as well.
+
+Brace yourself — it’s about to get wild.
