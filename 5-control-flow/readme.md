@@ -28,18 +28,46 @@ To check if a condition is fulfilled or not, you need to compare at least two en
 
 Based on the criterion meeting or not, the execution jumps.
 
-**Note: The `cmp` operation doesn't store the result anywhere. It manipulates the CPU flags based on the comparision.**
+`cmp` compares two operands by subtracting the second operand from the first operand.
+
+Example:
+```asm
+cmp op1, op2
+```
+> implies,  op1 - op2
+
+And there is no meaning in storing the result of subtraction because this is not what we wanted. Therefore, `cmp` sets some CPU flags to 1 based on the condition the result fulfills.
+
+  | **Flag**               | **Set When**                                                                 |
+  | ---------------------- | ---------------------------------------------------------------------------- |
+  | **ZF (Zero Flag)**     | `op1 == op2` (result is 0)                                                   |
+  | **SF (Sign Flag)**     | Result is negative (MSB = 1)                                                 |
+  | **CF (Carry Flag)**    | Borrow occurred (i.e., `op1 < op2` in **unsigned** terms)                    |
+  | **OF (Overflow Flag)** | Signed overflow occurred (e.g., positive - negative = negative unexpectedly) |
+
+Based on these CPU flags, we make the assumption about the result of comparison. The conditional jumps made assumptions about where to go on the basis of CPU flags only.
 
 Common conditional jumps include:
 
-| Instruction   | Meaning              | High Level Construct | Triggered by Flags |
-| ------------- | -------------------- | -------------------- | ------------------ |
-| `je` / `jz`   | Jump if equal / zero | ==                   | Zero Flag set      |
-| `jne` / `jnz` | Jump if not equal    | !=                   | Zero Flag clear    |
-| `jg`          | Jump if greater      | >                    | Signed greater     |
-| `jl`          | Jump if less         | <                    | Signed less        |
-| `ja`          | Jump if above        |                      | Unsigned greater   |
-| `jb`          | Jump if below        |                      | Unsigned less      |
+| **Jump Mnemonic** | **Condition (High-Level Equivalent)** | **Flags Involved (After `cmp`)** | **Description**              |
+| ----------------- | ------------------------------------- | -------------------------------- | ---------------------------- |
+| `je` / `jz`       | `==` (equal)                          | ZF = 1                           | Jump if equal / zero         |
+| `jne` / `jnz`     | `!=` (not equal)                      | ZF = 0                           | Jump if not equal / not zero |
+| `jg` / `jnle`     | `>`  (signed)                         | ZF = 0 and SF = OF               | Jump if greater              |
+| `jge` / `jnl`     | `>=` (signed)                         | SF = OF                          | Jump if greater or equal     |
+| `jl` / `jnge`     | `<`  (signed)                         | SF ≠ OF                          | Jump if less                 |
+| `jle` / `jng`     | `<=` (signed)                         | ZF = 1 or SF ≠ OF                | Jump if less or equal        |
+| `ja` / `jnbe`     | `>`  (unsigned)                       | CF = 0 and ZF = 0                | Jump if above                |
+| `jae` / `jnb`     | `>=` (unsigned)                       | CF = 0                           | Jump if above or equal       |
+| `jb` / `jnae`     | `<`  (unsigned)                       | CF = 1                           | Jump if below                |
+| `jbe` / `jna`     | `<=` (unsigned)                       | CF = 1 or ZF = 1                 | Jump if below or equal       |
+| `jmp`             | unconditional jump                    | *NA*                             | Always jump                  |
+
+**Note:**
+  1. Zero Flag (ZF) is set to 1 when the result of comparison is 0 (i.e the operands are equal).
+  2. Sign Flag (SF) is set to 1 when the result is negative (i.e MSB = 1)
+  3. Overflow Flag (OF) is set to 1 if signed overflow occurs.
+  4. Carry Flag (CF) is set to 1 if there is an unsigned borrow.
 
 ### 3. Jump, Jump, But Where Does It Jump?
 
