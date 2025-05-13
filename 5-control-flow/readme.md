@@ -47,22 +47,6 @@ And there is no meaning in storing the result of subtraction because this is not
 
 Based on these CPU flags, we make the assumption about the result of comparison. The conditional jumps made assumptions about where to go on the basis of CPU flags only.
 
-Common conditional jumps include:
-
-| **Jump Mnemonic** | **Condition (High-Level Equivalent)** | **Flags Involved (After `cmp`)** | **Description**              |
-| ----------------- | ------------------------------------- | -------------------------------- | ---------------------------- |
-| `je` / `jz`       | `==` (equal)                          | ZF = 1                           | Jump if equal / zero         |
-| `jne` / `jnz`     | `!=` (not equal)                      | ZF = 0                           | Jump if not equal / not zero |
-| `jg` / `jnle`     | `>`  (signed)                         | ZF = 0 and SF = OF               | Jump if greater              |
-| `jge` / `jnl`     | `>=` (signed)                         | SF = OF                          | Jump if greater or equal     |
-| `jl` / `jnge`     | `<`  (signed)                         | SF ≠ OF                          | Jump if less                 |
-| `jle` / `jng`     | `<=` (signed)                         | ZF = 1 or SF ≠ OF                | Jump if less or equal        |
-| `ja` / `jnbe`     | `>`  (unsigned)                       | CF = 0 and ZF = 0                | Jump if above                |
-| `jae` / `jnb`     | `>=` (unsigned)                       | CF = 0                           | Jump if above or equal       |
-| `jb` / `jnae`     | `<`  (unsigned)                       | CF = 1                           | Jump if below                |
-| `jbe` / `jna`     | `<=` (unsigned)                       | CF = 1 or ZF = 1                 | Jump if below or equal       |
-| `jmp`             | unconditional jump                    | *NA*                             | Always jump                  |
-
 **Note:**
   1. Zero Flag (ZF) is set to 1 when the result of comparison is 0 (i.e the operands are equal).
   2. Sign Flag (SF) is set to 1 when the result is negative (i.e MSB = 1)
