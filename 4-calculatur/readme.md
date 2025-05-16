@@ -222,6 +222,7 @@ div 2
 Meaning, `div rcx` means divide RDX:RAX by RCX.
 
 ### Sign Extension
+
 Before we can do signed division, we need to understand sign-extension.
 
 We have performed type conversion in high level languages.
@@ -247,16 +248,16 @@ Now how it is done?
 
 | Mnemonic | Meaning                    | Sign-extends from | To        | Used Before             |
 | -------- | -------------------------- | ----------------- | --------- | ----------------------- |
-| `cwd`    | Convert Word to Doubleword | `AX`              | `DX:AX`   | 16-bit `idiv`  |
-| `cdq`    | Convert Double to Quadword | `EAX`             | `EDX:EAX` | 32-bit `idiv` |
-| `cqo`    | Convert Quad to Octoword   | `RAX`             | `RDX:RAX` | 64-bit `idiv` |
+| `cwd`    | Convert Word to Doubleword | `AX`              | `DX:AX`   | 16-bit `idiv`           |
+| `cdq`    | Convert Double to Quadword | `EAX`             | `EDX:EAX` | 32-bit `idiv`           |
+| `cqo`    | Convert Quad to Octoword   | `RAX`             | `RDX:RAX` | 64-bit `idiv`           |
 
 These are all one-operand instructions — they read from the lower register and sign-extend into the upper half of the dividend pair.
 
 ### Signed Division (`idiv`)
 
 Syntax:
-```s
+```asm
 idiv reg
 idiv mem
 ```
@@ -265,6 +266,7 @@ idiv mem
 If either the dividend or the divisor is negative, idiv handles the sign.
 
 ### And Finally, The Almighty, Division Error
+
 If the quotient exceedes the 64-bit mark or you decided to divide by zero, you are gonna greeted with a `divide error exception`
 
 There’s no CF or OF to catch this — it's a full exception, so you must manage operands carefully.
@@ -281,7 +283,7 @@ But our programs lack the capability to act as standalone calculators.
 
 Yes. They do lack these capabilities. And that's how it is.
 
-Again, I have to reinforce this so that it get embedded in our psyche that assembly is not a high language. There are no built-in constructs.
+Again, I have to reinforce this so that it get embedded in our psyche that assembly is not a high-level language. There are no built-in constructs.
   - What was normal in high level languages, is definitely not normal in assembly.
   - Moving progressively is the mantra.
 
@@ -289,6 +291,6 @@ To answer the question, we need the knowledge of control flow and iteration, to 
 
 And this is precisely the next thing we are going to do.
 
-But one thing to keep in mind, we are definitely going to learn control flow and iteratio, but that's not the only thing we will learn. That's how assembly is. We will learn a ton of other things as well.
+But one thing to keep in mind, we are definitely going to learn control flow and iteration, but that's not the only thing we will learn. That's how assembly is. We will learn a ton of other things as well.
 
 Brace yourself — it’s about to get wild.
