@@ -228,3 +228,15 @@ But, if it is working, how it is bad?
   - While I am not an expert. I am just like you. But I will not stop here. I will explain you the why behind this undefined behaviour.
   - But this is going to be a long journey. It took me several hours, spanned across 2 days to fully comprehend the problem and write this explanation. It still might not be correct, but this is all that I have found on my own.
   - Lets debug this.
+
+----
+
+# Debugging The Code
+
+We will start with basic debugging.
+
+Debugging is basically the process of finding and fixing errors in softwares.
+
+There are standard programs like `gdb`, but we are not going to use them.
+
+We are going to start with some manual work and then we will build upon it.
