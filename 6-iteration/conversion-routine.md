@@ -175,3 +175,56 @@ Now about \n and \0.
   - The null-character, or `\0` is not someone would actually use or the system would inject on key-press. It has no real use. And that is why it is suitable for marking the end of a string.
 
 Task 1 completed.
+
+## Task 2: Integer To String Routine
+
+### High-level Overview
+
++ **Step 1**: We need to obtain individual digits from the number.
++ **Step 2**: Add '0' to each of them.
++ **Step 3**: Form the original digit by combining the individual digits obtained.
+
+----
+
+Let's do this.
+
+We have received the resultant number as 123.
+
+**Step 1**: Allocate a buffer to hold the result of the conversion.
+  - A 64-bit register can hold up to ~18q unsigned values, which comprises of 20 digits. And we need ony byte for the null-character. So 21 digits as all you need. But here we know that it is going to be 3-bytes long + 1 for \0. So lets allocate 5 bytes.
+
+**Step 2**: Repeatedly divide the number by 10 to obtain individual digits.
+  - Iteration 1, 123/10, remained = 3
+  - Iteration 2, 12/10, remained = 2
+  - Iteration 3, 1/10, remained = 1
+  - **Note: The digits are in opposite positions.**
+
+**Step 3**: Add '0' to every digit.
+
+**Step 4**: Since the digits are in opposite order, we have 2 choices.
+  1. Store the digits from the end of buffer backwards, then reverse the pointer at the end.
+  2. Store the digits in same order, and reverse the string before printing.
+
+**Step 5**: Add a null-character, `0x00` in the end.
+
+To prevent the confusion of registers, lets define which register we are using for what purpose.
+  - `rax`, to store the integer number (or dividend).
+    - We are chosing rax because we have to perform division and `div` operation by default divides the value in the accumulator pair.
+  - `rcx`, to store the divisor, which is 10, always.
+  - `dl`, to access the remainder, as it is stored in rdx.
+
+## Problem!
+
+Checkout the code [here](conversion-routine-2-doesnt-work.asm).
+
+This code is functionally incorrect. That means it shouldn't work?
+  - That's not the case.
+  - Either it will not work at all, or it will work just as fine.
+
+But, if it is working, how it is bad?
+  - The simeples answer is undefined behavior.
+  - But this answer is like saying "Oh, its an exception in organic chemistry!"
+  - If you go about understanding, you'll find the perfect reasoning behind it.
+  - While I am not an expert. I am just like you. But I will not stop here. I will explain you the why behind this undefined behaviour.
+  - But this is going to be a long journey. It took me several hours, spanned across 2 days to fully comprehend the problem and write this explanation. It still might not be correct, but this is all that I have found on my own.
+  - Lets debug this.
