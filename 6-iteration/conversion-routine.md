@@ -241,13 +241,15 @@ There are standard programs like `gdb`, but we are not going to use them.
 
 We are going to start with some manual work and then we will build upon it.
 
-## Isolate The Problem
+## Step 1, Isolate The Potential Problem
 
-The first step in debugging any piece of code is to isolate the problem.
+The first step in debugging any piece of code is to isolate the potential problem.
 
 You might say that "the problem is not always clear. And sometimes, it is the problem we are trying to find, before we can search for a solution."
 
-Absolutely right. But instincts matter.
+Absolutely right. I think it's not clear yet. Let's first set our objectives.
+
+**Goal**: *Identify the regions in code, where the problem might exist*.
 
 A piece of code can be easily flagged as "harmless" or "potential" on the basis of two things. These are familiarity and context.
   - I never did anything meaningful in any high-level programming language, therefore, I am not sure about how much context matters in them, but here it is inevitable.
