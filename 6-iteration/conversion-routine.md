@@ -240,3 +240,48 @@ Debugging is basically the process of finding and fixing errors in softwares.
 There are standard programs like `gdb`, but we are not going to use them.
 
 We are going to start with some manual work and then we will build upon it.
+
+## Isolate The Problem
+
+The first step in debugging any piece of code is to isolate the problem.
+
+You might say that "the problem is not always clear. And sometimes, it is the problem we are trying to find, before we can search for a solution."
+
+Absolutely right. But instincts matter.
+
+A piece of code can be easily flagged as "harmless" or "potential" on the basis of two things. These are familiarity and context.
+  - I never did anything meaningful in any high-level programming language, therefore, I am not sure about how much context matters in them, but here it is inevitable.
+  - So familiarity is basically the part of code which never changes or remains always like "that way" only.
+  - For example, to make a `write` syscall, we always have to set rax and rdi with 1. What changes is how rsi and rdi are set. But you'll never ever in any circumstance notice a different value in rax and rdi making for a `write` syscall. And that is familiarity in action.
+  - Now comes the context. As of now, if you don't now this, you aren't learning assembly.
+  - Context is the setting in which a particular action will work. Two actions, completely different, might still do the same thing, but the context is what that differentiates them.
+  - For example, recently we have learned about calling conventions.
+    - There we have read about how syscall expects registers to be aligned when it comes to passing arguments to the syscall.
+    - For some valid reasons, we know that rcx can't be used to hold any value in a syscall. Because it gets clobbered or overwritted. But rcx is valid in a function call.
+    - Here, where is rcx used matters more than how it is used. Because that will solely define if it will do what it is supposed to do.
+  - We can easily find the context in which we are in, and then we can try to match if the way we are trying to achieve it aligns with context or not.
+    - For example, `offset` is an assembler directive and works only with GAS, "assembler choice" is the context here. If you assemble it with masm, it might not work. And this becomes a potential for debugging.
+    - The same `offset` directive is an assembly-time thing. It can load static or global data defined in data section. But if you used it to load something thats defined in bss section, you are welcoming an undefined behavior. And here, "time" becomes the context.
+
+Lets isolate the problem.
+  - The `_start` and `convert_loop` labels seems to be correct, because we have write the same thing before as well.
+  - Also, the undefined behavior (depending on your case) also shows that they are working fine.
+  - The whole problem lies within the `done` label.
+  - `done`, although is basically a write syscall, but it can be divided b/w setting up the arguments (rsi and rdx) and setting up rax and rdi.
+  - If you notice, we always set rax and rdi to 1 in a `write` syscall. Therefore, we can flag it harmless.
+  - That means, the problem is somewhere around these 3 lines:
+    ```asm
+    mov rsi, rdi
+    mov rdx, result_buffer + 4
+    sub rdx, rdi
+    ```
+  - Great. The first step to debugging is accomplished.
+
+But how you come so sure about isolating it the right way?
+  - Great question and must be answered.
+  - If you notice, rdi has been manipulated a lot inside the `_start` and the `conver_loop` labels. It is highly probable that `rdi` has been mishandled.
+  - Line 2 in the above snippet is fundamentally wrong. And the reason boils down to assembly-time and runtime aspects. I'll explain it later. But this line is not right at all.
+  - Lets assume that line 2 is correct. It is highly posible that the subtraction operation is not carried out the right way. Or, it is not the right fit for what we are trying to achieve, calculating the length of the buffer.
+  - These are enough reasons to mark the above code piece as potential, not harmless.
+
+Now we can move to step 2.
