@@ -129,3 +129,11 @@ On outer-side, these loop structs seems to work differently. And this is kinda h
 And assembly exposes the underlying functionality preety neatly. You can see yourself that this is how a loop basically looks like. That's it.
 
 Now it's time to do some work.
+
+## The Problem!
+
+Last time, when we did basic arithmetic, we have added '0' to make the result ASCII-compatible. But this time, it can't work as we have multiple digits.
+
+Exactly. Now we are going to solve this problem forever.
+
+[Come here](./conversion-routine.md)
