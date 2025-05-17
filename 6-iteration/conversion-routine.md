@@ -241,7 +241,7 @@ There are standard programs like `gdb`, but we are not going to use them.
 
 We are going to start with some manual work and then we will build upon it.
 
-## Step 1, Isolate The Potential Problem
+## Step 1, Isolate The Potential Source Of The Problem
 
 The first step in debugging any piece of code is to isolate the potential problem.
 
@@ -287,3 +287,37 @@ But how you come so sure about isolating it the right way?
   - These are enough reasons to mark the above code piece as potential, not harmless.
 
 Now we can move to step 2.
+
+## Step 2, Isolate The Possible Problems
+
+**Progress Status: We have isolated what might be the source of the problem. The problem itself is still not known.**
+
+**Objective:** *Stress test the potential source, obtained in step 1 and try to isolate the problem further.*
+
+Lets look at the `sub` operation.
+  - It just subtracts what's inside the resgiters.
+  - Does it control what's inside those registers? Precisely NO.
+  - Then how can subtraction be the point of failure? Good question!
+  - That means, the problem lies in how the registers rsi and rdx are set.
+
+Lets revise what rsi and rdx are meant for, in this context.
+  - `rsi` is responsible for holding the memory location which has to be written on the terminal.
+  - `rdx` is responsible for holding the length of the buffer that is about to be written.
+
+**Have you wondered why rdx is needed at the first place? When we already have the buffer, why do we have to pass the length of the buffer along side?**
+  - Don't worry. By the end of this, you'll have your answer.
+  - Just to hint, this is not the actual problem, but this the eventual problem.
+  - Sit tight and enjoy the ride.
+
+So now the problem can be either of the two, 
+  1. how the registers rsi and rdx are set, or,
+  2. the value that is inside these registers.
+
+But what are the basis of your reasoning?
+  - You are right to question this.
+  - We are already sure that the registers aren't clobbered or wrong all the way. We are setting the right registers.
+  - We are setting rsi via rdi. As per the code, rdi must contain the pointer to the start of the buffer. But who guarantees this? I can't. This implies that rsi might not contain the right memory address!
+  - When we are setting rdx, we are using the label along with the default byte-length. Then we rely on subtraction operation for calculation of actual buffer length. Is our assumption about rdx pointing to the end of the buffer actually correct? It seems, but "seems" can't verify this.
+  - I think this is enough reasoning to prove that our assumption about what could possibly be the problem is right.
+
+Now we can move to step 3.
