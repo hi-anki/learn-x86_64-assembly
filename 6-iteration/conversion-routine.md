@@ -321,3 +321,149 @@ But what are the basis of your reasoning?
   - I think this is enough reasoning to prove that our assumption about what could possibly be the problem is right.
 
 Now we can move to step 3.
+
+## Step 3, Stress-Test The Source For The Possible Problems
+
+**Progress Status: We have identified the potential source of the problem and the possible set of problems.**
+
+**Objective:** *Now we have to stress-test the source for these "possible problems".*
+
+How we are going to do that?
+  - Since this is not a high-level language, writing printfs is not a solution. Even writing `write` syscalls is not the solution I want to go for. Because it complicates the already complicated code further.
+  - But what exactly a `printf` would do in debugging?
+    - We would use it to display what our variables actually contain before and after an operation.
+    - If it contains the right value, we can shift towards other instructions.
+    - But if they contain a value which is wrong, we have intercepted the core issue. Now we have to identify the source of it. Thats' it.
+  - That means, we are only concerned about seeing what's in rsi and rdx in different scenarios, which we will talk about later. Right?
+
+  - Every process, when exits, leaves a exit code behind, which defines the status of whether the process was a success or a failure.
+    - Remember `return 0` in C, in the main() function. It is meant to tell that the process completed successfully.
+  - If you have noticed, we always xor the value in rdi. That's because, 0 denotes a successful completion.
+  - If we can put the value in these registers into rdi of the exit syscall, we can see what's in them. Does that make sense?
+
+We are gonna do that using `r8`, because it has no purpose here.
+
+Checkout [cr2-v1.asm](./debug-cr2/cr2-v1.asm).
+  - There are two new instructions at line 35 and 44.
+    ```asm
+    mov r8, rdx         # Line 35
+    mov rdi, r8         # Line 44
+    ```
+  - First of all, we have still kept the xor instruction because I don't want anything garbage in rdi.
+
+Perfect. The playground is set now.
+
+Before doing anything, what we are testing for?
+  - We are interested in seeing what does rdx contains after these two operations.
+
+What we are interested to see?
+  - Time will tell.
+
+Now, no more talks.
+
+  - If you are assembling using the custom assembler script, use `-ec` flag to get exit code printed on the console.
+
+  - If you are using `as` and `ld` directly, do `echo $?` after running the binary, to get the exit code of the last process.
+
+"We got 0, How? It should had 4, right?" There is more to it.
+
+Since we are going to test it rigorously, lets create a table. Test the binary for all of this points and note the result.
+
+| Test Point  | Exit Code        |
+| ----------  | ---------------- |
+| result      | 123Exit Code: 0  |
+| result + 0  | 123Exit Code: 0  |
+| result + 1  | 123Exit Code: 49 |
+| result + 2  | 123Exit Code: 50 |
+| result + 3  | 123Exit Code: 51 |
+| result + 4  | Exit Code: 0     |
+| result + 5  | Exit Code: 0     |
+| result + 20 | Exit Code: 0     |
+
+> Strange!
+
+Lets probe for rsi. Checkout [cr2-v2.asm](./debug-cr2/cr2-v2.asm)
+
+Execute the binary and check the exit code.
+
+"1"? What is 1?
+
+Even if you add multiple `inc rdi` before the `jmp done` instruction, you will get 1,2,3,4..... no matter how far you will go.
+
+On the contrary, if you add multiple decrement statements, instead of increment, the values will get wrapper to 255 and go below it.
+
+Assuming that 1 represents pointer to the 1st byte in the ascii stream, rdx should represent the last one. And when subtraction occurs, we get the desired length of the buffer. Just as we though.
+  - But the table above tells a different story.
+  - This clearly signifies that this operation, `mov rdx, result_buffer + 4` is incorrect.
+  - According to this statement, rdx must now hold the pointer to the end of the buffer. And rdi is already holding the start of the buffer. So subtraction will do its job next.
+  - The problem is that this is not the right way to load the address of a buffer.
+
+You might ask, how I know this is not the right way to store the address? In many scenarios in the above table, 123 got displayed.
+  - If you are indicating that rdi is pointing to a wrong memory location, and this is causing the problem, lets test this assumption as well.
+  - Let's manually hard-code 3 in rdx. If 123 is dispayed, and 0 as exit code, this proves that this is not the problem.
+  - Run the binary.
+  - You got 123?
+  - Still not satisfied? Run the binary with rdx as 2 and 1. Got only 2 and 1?
+  - This proves that rsi is set right.
+
+Now, it is certain that the problem is with how rdx is being set.
+
+If you notice the exit codes in the table, you will find that we get 0 for 1st two points, which are basically the same.
+  - But we shouldn't have 0. Why?
+  - That 0 represents that nothing is even passed in rdx. How?
+  - If you notice above, the loop is exited only when there is no more digit in accumulator or rax. Repeated division has already zeroed rax.
+  - Run [cr2-v4.asm](./debug-cr2/cr2-v4.asm). Still got 0?
+  - This is where the undefined behavior was stemming from.
+
+Okay. The story is clear now. We know that the `mov rdx, result_buffer + 4` instruction is wrong. This gave birth to an undefined behavior. But why it is wrong?
+  - The move instruction is meant for moving values. That's it.
+  - When you write an immediate like 45, it is directly placed in the register/memory-location.
+  - When you pass a memory location, that memory location is stored in the register.
+  - If you pass a dereferenced memory location to a register, it will access the value at the location and put it in the register.
+  - `result_buffer` refers to a memory location. Adding 4 to it means we want to access the the 5th-byte from the `result_buffer` offset. Nothing is wrong in this.
+  - Absolutely.
+
+The devil is in the details.
+  - We already know about assembly-time and runtime contexts.
+  - When we label a memory, it is just an assembly-time constant, or more specifically, a symbol.
+  - A symbol gets resolved to a virtual address. It is not necessary that at runtime, the same location is alloted to the buffer.
+  - Therefore, it is important to retreive the effective address of the labelled memory. The address which is assigned to it at runtime. At runtime, CPU is the king. Assembler can't do anything.
+  - The assembler resolves anything that is could to a proper memory location, before it is actually ran.
+  - So as with `mov rdx, result_buffer + 4`. rdx is perfectly assigned the 5th-byte here.
+  - But the problem is, you don't know where it will be allotted in memory. But here we are using it. So assembler assigns it a virtual address. But there is no guarantee that it would get resolved.
+
+## Solution?
+
+Just replace mov with lea. And we are good to go. That's it. That's our solution.
+
+`lea`, which stands for **load effecive address**, is a CPU instruction that computes an address and stores it at a memory location, without actually accessing the memory.
+
+```asm
+lea dest_reg, memory_computation
+```
+**Note: [] do dereferencing but when it comes to lea, they don't.**
+
+Also,
+```
+mov rdi, offset label
+
+lea rdi, [rel label]
+```
+> are the same things, except that offset is an assembler directive and does things on assembly-time while lea does things on runtime.
+
+# Conclusion
+
+A big writeup, just to say, "replace mov with lea".
+
+You know how easy it is to say, "replace mov with lea". But it is immensely hard to justify why.
+
+Each time I look at this problem, a new question arises in my mind.
+
+The first time when I had this, I even went into linker maps to understand why this code is messed up. But in the 2nd run, when I am writing this, I found that it is not really required.
+  - It definitely explains the more fundamental thing that labels are just named memory locations.
+  - Even if a label's bounds are logically ended, and if you still continued to access the memory, no one's gonna stop you. No one is help responsible for this job, except you, the programmer.
+  - And linker map showed this exactly.
+  - It proved why bounds are specially imposed. They don't exist, because there is no reason for them to exist.
+  - But I think that's a story we should keep for the next time.
+
+I have tried my best. I might still be wrong at some place. And if a senior and more experienced person is reading this, feel free to correct me.
