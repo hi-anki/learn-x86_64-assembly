@@ -455,7 +455,7 @@ lea rdi, [rel label]
 ```
 > are the same things, except that offset is an assembler directive and does things on assembly-time while lea does things on runtime.
 
-# Conclusion
+## Conclusion
 
 A big writeup, just to say, "replace mov with lea".
 
