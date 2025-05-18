@@ -471,3 +471,23 @@ The first time when I had this, I even went into linker maps to understand why t
   - But I think that's a story we should keep for the next time.
 
 I have tried my best. I might still be wrong at some place. And if a senior and more experienced person is reading this, feel free to correct me.
+
+# Full Routine
+
+Now that we have both the routines, we can combine them into one single routine. Like [this](./unsigned-conversion-routine.asm).
+
+But this is not fool-proof yet. It has got some problems.
+
+## The Limitations
+
+1. Hardcoded Input.
+   - Just make a read syscall. Is it that hard?
+2. A `read` syscall is `LF` terminated not null-terminated.
+   - OK.
+3. Supports only unsigned integers.
+
+Lets tackle `LF` issue.
+  - As long as we are in assembly only, just replace null-termination with LF. That's all we have to do.
+  - Cons? Can't use `glibc` functions.
+  - Or, replace `LF` with `\0`. But for this, we have to do extra work. But this ensures we are compatible with `glibc`.
+  - Matching for `LF` is in the best of our interests.
