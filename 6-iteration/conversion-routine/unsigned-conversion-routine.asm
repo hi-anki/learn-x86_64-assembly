@@ -5,7 +5,7 @@
   input_str: .asciz "1289743"
 
 .section .bss
-  result_buffer: .skip 20
+  result_buffer: .skip 20                   # 64-bit = ~18q combinations = 20 digits long
 
 .section .text
   .global _start
