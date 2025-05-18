@@ -203,7 +203,11 @@ We have received the resultant number as 123.
 
 **Step 4**: Since the digits are in opposite order, we have 2 choices.
   1. Store the digits from the end of buffer backwards, then reverse the pointer at the end.
-  2. Store the digits in same order, and reverse the string before printing.
+     - We are going with this.
+     - Because it comes with least overhead.
+     - We don't have to do any arithmetic on this result. It is just meant to be displayed. That's it.
+     - Making stack calls, using recursion, these aren't efficient here.
+  3. Store the digits in same order, and reverse the string before printing.
 
 **Step 5**: Add a null-character, `0x00` in the end.
 
