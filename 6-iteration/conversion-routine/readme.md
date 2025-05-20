@@ -491,3 +491,35 @@ Lets tackle `LF` issue.
   - Cons? Can't use `glibc` functions.
   - Or, replace `LF` with `\0`. But for this, we have to do extra work. But this ensures we are compatible with `glibc`.
   - Matching for `LF` is in the best of our interests.
+
+Now lets talk about signed integers.
+
+## Extending The Routine For Signed Integers
+
+Right now, we read character-by-character using this line: `movzx rcx, byte ptr [rsi]`
+  - Suppose, we have entered -1234.
+  - The firs character is `-`, whose ascii value in decimal is 45.
+
+Next, we subtract '0' to obtain literal digits.
+  - '0' is represented by 48 in ascii decimal representation.
+  - `45 - 48 = -3`, here `-3` is a very large unsigned integer, which is purely garbage here.
+  - We need to manage this `-` before we can do anything.
+
+Strategy:
+  - Detect the sign.
+  - Parse the numbers as usual.
+  - Add the sign where required.
+
+Now, action!
+
+To prevent registers havoc, here is a table:
+
+| Register | Used For |
+| -------- | -------- |
+| rax      | numerator in division |
+| rbx      | denominator in division |
+| rcx      | result of ascii to int |
+| r9b      | To load individual characters |
+| r8b      | sign-bit of the number, 0 for + and 1 for - |
+
+Rest, everything is same.

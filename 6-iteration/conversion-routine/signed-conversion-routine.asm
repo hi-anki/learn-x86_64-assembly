@@ -15,7 +15,7 @@ _start:
   mov rdx, 20
   syscall
 
-  # ASCII to INT
+# ASCII to INT
 ascii_to_int:
   lea rsi, input_buffer
   xor rcx, rcx
@@ -51,6 +51,7 @@ ascii_parser:
 
   inc rsi
   jmp ascii_parser
+# ASCII PARSING DONE
 
 int_result:
   # The number is parsed now and now we have to put the sign, if needed
@@ -58,7 +59,7 @@ int_result:
   je int_to_ascii
   neg rcx
 
-  # INT to ASCII
+# INT to ASCII
 int_to_ascii:
   mov rax, rcx
   lea rdi, result_buffer + 19
@@ -74,8 +75,6 @@ make_positive:
   neg rax
 
 repeated_division:
-  # mov r12, rax
-  # jmp exit
   xor rdx, rdx
   xor rbx, rbx
   mov rbx, 10
@@ -97,14 +96,12 @@ resolve_sign:
 
 add_minus:
   mov byte ptr [rdi], '-'
+# INT PARSING DONE
 
 display:
-  # dec rdi
   mov rsi, rdi
   lea rdx, result_buffer + 19
   sub rdx, rdi
-
-  # mov r12, rdx
 
   mov rax, 1
   mov rdi, 1
@@ -113,5 +110,4 @@ display:
 exit:
   mov rax, 60
   xor rdi, rdi
-  # mov rdi, r12
   syscall
