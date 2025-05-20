@@ -205,3 +205,11 @@ The difference lies in result management.
 `sub` stores the result in accumulator, by default. But `cmp` never stores the result.
 
 Both of them change CPU flags, based on the result.
+
+# Important Note
+
+Labels don't have context of where you have left.
+
+If you try to return back to a label which called the current label, the return would be absolute. Meaning, the instruction pointer will point to the start of the label, not where you have left.
+
+Keep control flow in forward direction only, to avoid potential undefined behavior, **for now**.
