@@ -137,3 +137,7 @@ Last time, when we did basic arithmetic, we have added '0' to make the result AS
 Exactly. Now we are going to solve this problem forever.
 
 [Come here](./conversion-routine/readme.md)
+
+## Now, we are ready to ASCEND!
+
+The time has come to make our fully functional two operands calculator.
