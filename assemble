@@ -1,21 +1,46 @@
 #!/bin/bash
 
+print_usage() {
+  echo "Usage: $0 [-ec] <source.asm|source.s>"
+  exit 1
+}
+
+# --- Argument Parsing ---
+print_ec=false
+if [ "$1" = "-ec" ]; then
+  print_ec=true
+  shift
+fi
+
+# Check for correct number of arguments
 if [ $# -ne 1 ]; then
-  echo "Usage: $0 <source.asm>"
-  echo "Usage: $0 <source.s>"
+  print_usage
 fi
 
 full_filename=$1
-if [[ "$full_filename" != *.asm && "$full_filename" != *.s ]]; then
-  echo "Invalid file type."
-  exit ;
-fi
+
+# Validate extension
+case "$full_filename" in
+  *.asm|*.s) ;;
+  *) echo "Invalid file type."; exit 1 ;;
+esac
 
 filename=${full_filename%%.*}
 
+# Assemble
 as "$full_filename" -o "$filename.o" || { echo "Assembling failed"; exit 1; }
+
+# Link
 ld "$filename.o" -o "$filename" || { echo "Linking failed"; exit 1; }
 
-./"$filename"
+# Run
+"./$filename"
+exit_code=$?
 
-rm "$filename" "$filename".o
+# Optional: Show exit code
+if [ "$print_ec" = true ]; then
+  echo "Exit Code: $exit_code"
+fi
+
+# Cleanup
+rm "$filename" "$filename.o"
