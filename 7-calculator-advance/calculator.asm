@@ -17,8 +17,11 @@
   res_div: .ascii "Num1 / Num2 = "
   res_len = . - res_div
 
-  terminate: .ascii "Come back soon...\n"
-  ter_len = . - terminate
+  invalid_oper: .ascii "Unsupported operation.\nSupported Operations Include +, -, *, /\n"
+  invalid_len - . - invalid_oper
+
+  end_program: .ascii "Exiting the program.....\nCome back soon...\n"
+  end_len = . - end_program
 
 .section .bss
   num1_buffer: .skip 20
@@ -111,22 +114,19 @@ n1_ascii_parser:
   jmp n1_manage_sign
 
 n1_manage_sign:
-  xor r11, r11
   cmp r8b, 0
-  je plus
-  neg rcx
-  mov r11, rcx
+  jne n1_add_minus
   jmp n2_ascii_to_int_conversion
 
-n1_plus:
-  mov r11, rcx
+n1_add_minus:
+  neg rcx
   jmp n2_ascii_to_int_conversion
 
 n2_ascii_to_int_conversion:
   xor rsi, rsi
   lea rsi, num2_buffer
-  xor rcx, rcx
-  xor r8, r8                              # sign-bit (0 for + && 1 for -)
+  xor r11, r11
+  xor r10, r10                            # sign-bit (0 for + && 1 for -)
   xor r9, r9                              # load individual characters from the number
 
 n2_check_sign:
@@ -138,7 +138,7 @@ n2_check_sign:
   jmp n2_ascii_parser
 
 n2_set_neg:
-  mov r8b, 1
+  mov r10, 1
   inc rsi
   jmp n2_ascii_parser
 
@@ -153,24 +153,137 @@ n2_ascii_parser:
   je n2_store_result
 
   sub r9, '0'
-  imul rcx, rcx, 10
-  add rcx, r9
+  imul r11, r11, 10
+  add r11, r9
 
   inc rsi
   jmp n2_store_result
 
 n2_manage_sign:
-  xor r12, r12
-  cmp r8b, 0
-  je plus
-  neg rcx
-  mov r12, rcx
+  cmp r10, 0
+  jne n2_add_minus
   jmp arithmetic
 
-n2_plus:
-  mov r12, rcx
+n2_add_minus:
+  neg r11
   jmp arithmetic
 
 arithmetic:
   cmp byte ptr [oper_buffer], '+'
-  # Will continue from here tomorrow!
+  je compute_add
+
+  cmp byte ptr [oper_buffer], '-'
+  je compute_sub
+
+  cmp byte ptr [oper_buffer], '*'
+  je compute_mul
+
+  cmp byte ptr [oper_buffer], '/'
+  je compute_div
+
+  jne terminate_program
+
+compute_add:
+  xor r12, r12
+  add r12, rcx
+  add r12, r11
+  jmp manage_sign_in_result
+
+compute_sub:
+  xor r12, r12
+  mov r12, rcx
+  neg r11
+  add r12, r11
+  neg r11
+  jmp manage_sign_in_result
+
+compute_mul:
+  xor r12, r12
+  imul r12, rcx, r11
+  jmp manage_sign_in_result
+
+compute_div:
+  xor r12, r12
+  xor rax, rax
+  xor rdx, rdx
+  mov rax, rcx
+  cqo
+  idiv r11
+  mov r12, rax
+  jmp manage_sign_in_result
+
+manage_sign_in_result:
+  xor r13, r13
+  test r12, r12
+  je is_neg
+  jne compute_ascii_result
+
+is_neg:
+  mov r12b, 1
+  jne compute_ascii_result
+
+compute_ascii_result:
+  mov rax, r12
+  lea rdi, res_buffer + 19
+  mov byte ptr [rdi], 0
+  dec rdi
+
+parse_integer_result:
+  cmp rax, 0
+  jl make_positive
+  jne repeated_division
+
+make_positive:
+  neg rax
+
+repeated_division:
+  xor rdx, rdx
+  xor rbx, rbx
+  mov rbx = 10
+
+  div rbx
+  add dl, '0'
+  mov [rdi], dl
+
+  test rax, rax
+  je resolve_sign
+  dec rdi
+  jmp repeated_division
+
+resolve_sign:
+  cmp r12b, 0
+  je display_result
+  dec rdi
+  jne add_minuss
+
+add_minuss:
+  mov byte ptr [rdi], '-'
+
+display_result:
+  mov rsi, rdi
+  lea rdx, res_buffer + 19
+  sub rdx, rdi
+
+  mov rax, 1
+  mov rdi, 1
+  syscall
+
+terminate_program:
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, offset invalid_oper
+  mov rdx, invalid_len
+  syscall
+
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, offset end_program
+  mov rdx, end_len
+  syscall
+
+  jmp exit
+
+exit:
+  mov rax, 60
+  xor rdi, rdi
+  syscall
