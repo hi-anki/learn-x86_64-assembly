@@ -18,7 +18,7 @@
   res_len = . - res_div
 
   invalid_oper: .ascii "Unsupported operation.\nSupported Operations Include +, -, *, /\n"
-  invalid_len - . - invalid_oper
+  invalid_len = . - invalid_oper
 
   end_program: .ascii "Exiting the program.....\nCome back soon...\n"
   end_len = . - end_program
@@ -76,6 +76,7 @@ read_operator:
   mov rdi, 0
   lea rsi, oper_buffer
   mov rdx, 2
+  syscall
 
 n1_ascii_to_int_conversion:
   lea rsi, num1_buffer
@@ -102,16 +103,16 @@ n1_check_plus:
 
 n1_ascii_parser:
   xor r9, r9
-  movzx r9, byt ptr [rsi]
+  movzx r9, byte ptr [rsi]
   cmp r9b, 10                             # 10 = LF
-  je n1_store_result
+  je n1_manage_sign
 
   sub r9, '0'
   imul rcx, rcx, 10
   add rcx, r9
 
   inc rsi
-  jmp n1_manage_sign
+  jmp n1_ascii_parser
 
 n1_manage_sign:
   cmp r8b, 0
@@ -148,16 +149,16 @@ n2_check_plus:
 
 n2_ascii_parser:
   xor r9, r9
-  movzx r9, byt ptr [rsi]
+  movzx r9, byte ptr [rsi]
   cmp r9b, 10                             # 10 = LF
-  je n2_store_result
+  je n2_manage_sign
 
   sub r9, '0'
   imul r11, r11, 10
   add r11, r9
 
   inc rsi
-  jmp n2_store_result
+  jmp n2_ascii_parser
 
 n2_manage_sign:
   cmp r10, 0
@@ -219,7 +220,7 @@ manage_sign_in_result:
   jne compute_ascii_result
 
 is_neg:
-  mov r12b, 1
+  mov r13b, 1
   jne compute_ascii_result
 
 compute_ascii_result:
@@ -239,7 +240,7 @@ make_positive:
 repeated_division:
   xor rdx, rdx
   xor rbx, rbx
-  mov rbx = 10
+  mov rbx, 10
 
   div rbx
   add dl, '0'
@@ -251,7 +252,7 @@ repeated_division:
   jmp repeated_division
 
 resolve_sign:
-  cmp r12b, 0
+  cmp r13b, 0
   je display_result
   dec rdi
   jne add_minuss
@@ -267,6 +268,8 @@ display_result:
   mov rax, 1
   mov rdi, 1
   syscall
+
+  jmp exit
 
 terminate_program:
   mov rax, 1
