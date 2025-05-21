@@ -52,3 +52,6 @@ In the context of this capston project, I am observing a chaotic situation where
 To find if the MSB is signed or not, we can use `js` and `jns` operations.
   - js: when msb is 1, when result is -ve
   - jns: when msb is 0, when result is +ve or 0
+
+# Time Taken To Complete :: <3 Hours
+# Time Taken To Learn Everything Used Here :: 18+ Days
