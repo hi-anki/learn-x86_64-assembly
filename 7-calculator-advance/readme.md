@@ -48,3 +48,7 @@ In the context of this capston project, I am observing a chaotic situation where
 | -------- | ------- |
 | r9       | Load individual characters from the number sequence |
 | rbx      | Divisor |
+
+To find if the MSB is signed or not, we can use `js` and `jns` operations.
+  - js: when msb is 1, when result is -ve
+  - jns: when msb is 0, when result is +ve or 0

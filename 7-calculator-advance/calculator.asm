@@ -17,10 +17,10 @@
   res_div: .ascii "Num1 / Num2 = "
   res_len = . - res_div
 
-  invalid_oper: .ascii "Unsupported operation.\nSupported Operations Include +, -, *, /\n"
+  invalid_oper: .ascii "\nUnsupported operation.\nSupported Operations Include +, -, *, /\n"
   invalid_len = . - invalid_oper
 
-  end_program: .ascii "Exiting the program.....\nCome back soon...\n"
+  end_program: .ascii "\nExiting the program.....\nCome back soon...\n"
   end_len = . - end_program
 
 .section .bss
@@ -200,7 +200,9 @@ compute_sub:
 
 compute_mul:
   xor r12, r12
-  imul r12, rcx, r11
+  # imul r12, rcx, r11                            # Illegal instruction with respect to GAS
+  mov r12, rcx
+  imul r12, r11
   jmp manage_sign_in_result
 
 compute_div:
@@ -216,8 +218,8 @@ compute_div:
 manage_sign_in_result:
   xor r13, r13
   test r12, r12
-  je is_neg
-  jne compute_ascii_result
+  jns compute_ascii_result
+  js is_neg
 
 is_neg:
   mov r13b, 1
@@ -278,15 +280,15 @@ terminate_program:
   mov rdx, invalid_len
   syscall
 
+  jmp exit
+
+exit:
   mov rax, 1
   mov rdi, 1
   mov rsi, offset end_program
   mov rdx, end_len
   syscall
 
-  jmp exit
-
-exit:
   mov rax, 60
   xor rdi, rdi
   syscall
