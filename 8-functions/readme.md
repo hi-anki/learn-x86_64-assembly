@@ -148,3 +148,46 @@ When a procedure is called, a stack frame is created to hold:
   - The previous base pointer (rbp)
   - Space for local variables
   - Possibly saved callee-saved registers
+
+# Pointer Registers
+
+I want to cover this topic as a separate thing because this item is confusing if I don't understand it well.
+
+What are pointer registers?
+  - The registers whose canonical use is to store pointer to memory locations.
+  - They can be used as general purpose registers but when I am doing something that involves **System V ABI's calling conventions**, it is important to use them for what they are meant for in the convention.
+
+Here is a table that maps this information clearly,
+
+| Register   | Role / Use Case              | Canonical Use-Case                    |
+| ---------- | ---------------------------- | ------------------------------------- |
+| `rsi`      | Source Index Register        | Stores the pointer to the source memory address |
+| `rdi`      | Destination Index Register   | Stores the pointer to the destination memory address |
+| `rsp`      | Stack Pointer Register       | Stores the pointer to the top of the current stack (volatile) |
+| `rbp`      | Base Pointer Register        | Stores the pointer to the base or first item in the current stack frame (fixed) |
+| `rip`      | Instruction Pointer Register | Stores the pointer to the next instruction to be executed |
+
+- I have already used `rsi` in pointing to the memory buffer to be displayed. It's job is to point to the start of the memory buffer which is beign used in the current memory operation.
+
+- I have used `rdi` for storing file descriptors. If I recall, a file descriptor is basically the destination of the syscall. For example -
+  - A `write` syscall, which is used to write to the terminal, uses 1 as file descriptor. Here, 1 reflects the console as destination of the operation.
+  - A `read` syscall, which is used to take read input from the terminal, uses 0 as file descriptor. Here, 0 reflects the console which is the point where the input would be taken from.
+
+- `rsp` is the stack pointer. It is meant for storing the top of the stack.
+  - Remember having `top` pointer in C, when I was writing simple stack implementation using arrays? `rsi` is the same thing.
+
+- Constant `push` and `pop` operations makes `rsp` volatile to store the base of the stack, which is the first thing in the stack. Assume the base as the first argument in an array, which is meant to mimic a stack.
+  - But why do I even need it?
+  - Remember doing `top++`? Initially, top was at 0. Doing `++` makes it move to the next byte (1, 2, 4, 8; depending on the data type).
+  - But `top` initially pointed at 0.
+  - Now `rsi` is meant to store the `top`. It has nothing to do with the bottom. Even `rsi` don't know it is storing the top of a stack. It is just storing a memory address.
+  - What if rsi is decremented so much that it passed the stack frame? There is no guardrails, because there is no need for them. Memory is flat.
+  - How will I know I have reached `stack underflow`?
+  - There has to be something, that is fixed to the bottom of the stack, beyond which, the stack frame is no more.
+  - This gives birth to `rbp`, which is the base pointer of the stack.
+  - Take this, `rbp` stores the bottom of the current stack frame, while `rsp` stores the top of the current stack frame.
+  - They both are relative to the current stack frame.
+
+- `rip`, on the other hand, is the global instruction pointer.
+  - It stores the pointer to the next instruction to be executed, regardless of being inside a label or a function. It is always active.
+  - It is read-only for obvious reasons. And I have common-sense to not question it.
