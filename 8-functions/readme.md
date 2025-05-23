@@ -191,3 +191,85 @@ Here is a table that maps this information clearly,
 - `rip`, on the other hand, is the global instruction pointer.
   - It stores the pointer to the next instruction to be executed, regardless of being inside a label or a function. It is always active.
   - It is read-only for obvious reasons. And I have common-sense to not question it.
+
+It's time to get practical and put my understanding in one thread.
+
+# Understanding Procedures
+
+Take this example of calculating the square of a number,
+```asm
+.intel_syntax noprefix
+
+.section .text
+.global _start
+
+_start:
+  mov rdi, 5          # argument: n = 5
+  call square         # call the procedure
+  mov rdi, rax        # move result to rdi for exit
+  mov rax, 60         # syscall: exit
+  syscall
+
+square:
+  push rbp            # prologue start
+  mov rbp, rsp
+  mov rax, rdi        # copy argument to rax
+  imul rax, rdi       # rax = rdi * rdi
+  pop rbp             # epilogue
+  ret
+
+```
+
+Here, we have the main context, and a procedure context. Therefore, there will be two stack frames.
+
+The first stack frame is for the main program and the second frame is going to be within the first frame, which is for the `square` procedure.
+
+Lets build both the stack frames.
+
+To avoid unnecessary complexity, addresses being used are simple numbers, which increment by 1 only, not by word.
+
+The top is at the top and the bottom is at the bottom, so that my previous mental model of stack can help me understanding it. Next, I will flip it as well.
+
+Assume the base pointer of the "main" stack frame is at 0000. And the top of the stack is at 1000.
+
+| Address | Content At Stack Row | |
+| ------- | -------------------- | - |
+| 0998    | saved base pointer for the current frame, which is 0000 | By main |
+| 0999    | return address to OS | Set by the caller, like C |
+
+Now 
+```
+rsp = 0998
+rbp = 0000
+```
+
+Now the procedure is called my main.
+
+
+| Address | Content At Stack Row |
+| ------- | -------------------- |
+| 0996    | saved base pointer of square's frame, which is 0998 |
+| 0997    | return address to the next instruction in the main after call |
+| 0998    | saved base pointer for the current frame, which is 0000 |
+| 0999    | return address to OS |
+
+Now
+```
+rbp = 0996
+rsp = 0996
+```
+
+`rdi = 5`, passed by the register
+
+`rax = rdi * rdi`, result in rax.
+
+No stack changes.
+
+Now come `pop rbp`. This removes the current base pointer from the stack frame. `ret` returns the result and the rip now points to the next instruction from 0997.
+
+| Address | Content At Stack Row | |
+| ------- | -------------------- | - |
+| 0998    | saved base pointer for the current frame, which is 0000 | By main |
+| 0999    | return address to OS | Set by the caller, like C |
+
+After the syscall, the program exits and the stack is freed by the caller, which is the OS.
