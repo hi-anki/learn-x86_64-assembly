@@ -37,3 +37,66 @@ Loosely, when I call a function in C:
 In assembly, as I know already, I have to do this by myself.
 
 Let's introduce it.
+
+# Introducing Procedures
+
+Everything problem mentioned above can be roughly equated with "**unstructured code**".
+
+This problem is solved by procedures.
+
+## What Exactly Is A Procedure?
+
+A procedure is a named, reusable block of code that performs a specific task, can accept input (arguments), and can return a result — while managing control flow and memory context safely.
+
+It’s exactly what functions are in high-level languages like C, and Python.
+
+## But How Is It Different Than A Label?
+
+| Label               | Procedure                          |
+| ------------------- | ---------------------------------- |
+| No return mechanism | Always returns to caller (`ret`)   |
+| No argument passing | Receives arguments in registers    |
+| No structure        | Has prologue and epilogue          |
+| Not reusable safely | Designed for reuse across codebase |
+| Breaks DRY          | Enables abstraction and reuse      |
+
+Basically, a procedure is a label with discipline.
+
+A procedure is a labeled code block with a disciplined calling and returning structure.
+
+Procedures solve the biggest problem in labels, which is, lack of context.
+
+## Anatomy Of A Procedure
+
+A procedure is composed of four core components:
+  1. Procedure Header (the label + interface)
+  2. Prologue (entry setup)
+  3. Body (the actual logic)
+  4. Epilogue (cleanup and return)
+
+### 1. Procedure Header
+
+This is simply **the label**, but, with a purpose.
+
+A procedure (label) isn't jumped, it's called.
+
+### 2. Prologue
+
+Prologue is about setting up those things which makes a label different than a procedure.
+
+The most important thing here is reserving the base pointer, the instruction I have come from.
+
+### 3. Body
+
+Here I will write the actual code, just like a label.
+
+### 4. Epilogue
+
+A label just jumps to the next thing forward, but a procedure has a context from where did he came. Therefore, it must return to that context.
+
+And as with every return, it is important to cleanup anything being messed up, return anything (if required), so that the instructions can execute properly.
+----
+
+With all these, it seems like a procedure is what that gives assembly the kind of structure I see in high-level languages like C and python, where I can actually control the flow of the execution, not just partially.
+
+And this a high-level overview of a procedure's liefcycle.
