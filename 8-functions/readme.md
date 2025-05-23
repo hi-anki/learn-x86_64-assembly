@@ -100,3 +100,51 @@ And as with every return, it is important to cleanup anything being messed up, r
 With all these, it seems like a procedure is what that gives assembly the kind of structure I see in high-level languages like C and python, where I can actually control the flow of the execution, not just partially.
 
 And this a high-level overview of a procedure's liefcycle.
+
+# Stack && Stack Frame
+
+## What Is A Stack?
+
+A stack is a data structure that operates on Last-In, First-Out (LIFO) principle. I know this already from my basic data structures knowledge.
+
+But when we talk about stack in context of memory, it is not just an abstract idea, implemented on software level.
+
+We're referring to a dedicated, reserved region of memory that behaves like a stack — at the hardware level.
+
+The top of the stack is always accessed via "stack pointer register" (or `rsp`).
+
+Stack pointer movement are *word-aligned*. It means that memory addresses used are multiples of 8.
+
+Stack grows downwards while heap grows upward. I know, a scene of conflict.
+
+### Memory Layout
+
+Low Memory
++------------------------+
+| Text (code)            |
+| Data (globals)         |
+| Heap (malloc) ↑        |
+|                        |
+|   (free space)         |
+|                        |
+| Stack (grows down) ↓   |
++------------------------+
+High Memory
+
+From the analogy of a "stack of plates," I know that a stack of plates grows upwards, for valid logical reasons. Then why the stack grows downwards?
+
+From my previous knowledge of stack and heap, heap is used for dynamic memory allocation, which I will learn about later on.
+
+If stack were grown upwards, at some point, it might meet heap, and that can cause undefined problems (collison).
+
+Growing stack downwards avoids a whole class of problem which might arise.
+
+## What Is A Stack Frame?
+
+A stack frame is a well-defined chunk of the stack that belongs to a single procedure call. It’s like a workspace that's created when a procedure starts and is destroyed when it finishes.
+
+When a procedure is called, a stack frame is created to hold:
+  - The return address
+  - The previous base pointer (rbp)
+  - Space for local variables
+  - Possibly saved callee-saved registers
