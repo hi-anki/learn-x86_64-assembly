@@ -23,3 +23,51 @@ At minimum, there are three sections in an assembly program,
   2. `.data`: for initialised data
   3. `.text`: code
 
+Next, we have syscalls. There are minutiae differences in the same syscall, depending upon the context. Here are some of those that I need to take care of:
+
+```asm
+# Read syscall, taking user input
+
+.section .bss
+  buffer: .skip bytes
+
+.section .text
+  mov rax, 0
+  mov rdi, 0
+  lea rsi, buffer
+  mov rdx, bytes
+  syscall
+```
+----
+```asm
+# Write syscall with initialised data ----- Method 1
+
+.section .data
+  buffer: .ascii "Hello, World!\n"
+  len_buff: . - buffer
+
+.section .text
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, offset buffer
+  mov rdx, len_buff
+```
+----
+```asm
+# Write syscall with initialised/uninitialised data ----- Method 2
+
+.section .data
+  buffer: .ascii "Hello, World!\n"
+  len_buff: . - buffer
+
+.section .text
+  # logic to calculate the actual buffer length filled and put it in rdx
+  mov rsi, rdi          # where rdi holds the pointer to the start of the data in the buffer  
+  lea rdx, buffer + (bytes - 1)
+  sub rdx, rdi
+
+  mov rax, 1
+  mov rdi, 1
+  syscall
+```
+----
