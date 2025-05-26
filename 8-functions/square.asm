@@ -11,9 +11,10 @@ _start:
   syscall
 
 square:
-  push rbp            # prologue start
-  mov rbp, rsp
+  push rbp            # prologue start, save old base pointer
+  mov rbp, rsp        # establish new base pointer, prologue end
+
   mov rax, rdi        # copy argument to rax
   imul rax, rdi       # rax = rdi * rdi
   pop rbp             # epilogue
-  ret
+  ret                 # return rax, the default place for for return
