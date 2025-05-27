@@ -113,9 +113,9 @@ We're referring to a dedicated, reserved region of memory that behaves like a st
 
 The top of the stack is always accessed via "stack pointer register" (or `rsp`).
 
-Stack pointer movement are *word-aligned*. It means that memory addresses used are multiples of 8.
+Stack pointer movement is *word-aligned*. It means that memory addresses used are in multiple of 8.
 
-Stack grows downwards while heap grows upward. I know, a scene of conflict.
+Stack grows downwards while heap grows upward.
 
 ### Memory Layout
 
@@ -131,9 +131,9 @@ Low Memory
 +------------------------+
 High Memory
 
-From the analogy of a "stack of plates," I know that a stack of plates grows upwards, for valid logical reasons. Then why the stack grows downwards?
+From the analogy of a "stack of plates," I know that a stack of plates grows upwards, for logical reasons. Then why the stack grows downwards?
 
-From my previous knowledge of stack and heap, heap is used for dynamic memory allocation, which I will learn about later on.
+From my previous knowledge of stack and heap, heap is used for dynamic memory allocation, which I will learn later.
 
 If stack were grown upwards, at some point, it might meet heap, and that can cause undefined problems (collison).
 
@@ -219,57 +219,3 @@ square:
   ret
 
 ```
-
-Here, we have the main context, and a procedure context. Therefore, there will be two stack frames.
-
-The first stack frame is for the main program and the second frame is going to be within the first frame, which is for the `square` procedure.
-
-Lets build both the stack frames.
-
-To avoid unnecessary complexity, addresses being used are simple numbers, which increment by 1 only, not by word.
-
-The top is at the top and the bottom is at the bottom, so that my previous mental model of stack can help me understanding it. Next, I will flip it as well.
-
-Assume the base pointer of the "main" stack frame is at 0000. And the top of the stack is at 1000.
-
-| Address | Content At Stack Row | |
-| ------- | -------------------- | - |
-| 0998    | saved base pointer for the current frame, which is 0000 | By main |
-| 0999    | return address to OS | Set by the caller, like C |
-
-Now 
-```
-rsp = 0998
-rbp = 0000
-```
-
-Now the procedure is called my main.
-
-
-| Address | Content At Stack Row |
-| ------- | -------------------- |
-| 0996    | saved base pointer of square's frame, which is 0998 |
-| 0997    | return address to the next instruction in the main after call |
-| 0998    | saved base pointer for the current frame, which is 0000 |
-| 0999    | return address to OS |
-
-Now
-```
-rbp = 0996
-rsp = 0996
-```
-
-`rdi = 5`, passed by the register
-
-`rax = rdi * rdi`, result in rax.
-
-No stack changes.
-
-Now come `pop rbp`. This removes the current base pointer from the stack frame. `ret` returns the result and the rip now points to the next instruction from 0997.
-
-| Address | Content At Stack Row | |
-| ------- | -------------------- | - |
-| 0998    | saved base pointer for the current frame, which is 0000 | By main |
-| 0999    | return address to OS | Set by the caller, like C |
-
-After the syscall, the program exits and the stack is freed by the caller, which is the OS.
