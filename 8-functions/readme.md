@@ -194,9 +194,10 @@ Here is a table that maps this information clearly,
 
 It's time to get practical and put my understanding in one thread.
 
-# Understanding Procedures
+# Understanding Procedures AND Stack Mgmt
 
 Take this example of calculating the square of a number,
+
 ```asm
 .intel_syntax noprefix
 
@@ -215,7 +216,205 @@ square:
   mov rbp, rsp
   mov rax, rdi        # copy argument to rax
   imul rax, rdi       # rax = rdi * rdi
-  pop rbp             # epilogue
+
+  mov rsp, rbp        # epilogue
+  pop rbp
   ret
 
 ```
+
+This is the memory layout:
+
+```
+Lower Memory
+----x---x----
+
+0000
+0008
+0016
+0024
+.
+.
+.
+.
+0976
+0984
+0992
+1000
+
+----x---x----
+Higher Memory
+```
+
+The stack grows downwards, from higher memory address to lower memory address, meaning, the top of the stack would be at 1000 and it would grow towards 0000.
+
+```
+Lower Memory
+----x---x----
+
+0000        <-- The Lowest rsp Can Go
+0008
+0016
+0024
+.
+.
+.
+.
+0976        <-- locals
+0984        <-- old base pointer
+0992        <-- return address
+1000        <-- Top Of The Stack (rsp)
+
+----x---x----
+Higher Memory
+```
+
+How this exact frame gets set up automatically? That's the question we are going to figure out now.
+
+Before moving further, what does a push and pop operation actually do, figuring that out before will save lot of hours.
+
+`push`:
+  - Subtracts rsi, word-aligned, i.e `rsp--` or `sub rsp, 8`
+  - Dereference rsi and put the value at that location, i.e `[rsi] = imm/reg` or `mov [rsi], imm/reg`
+
+`pop reg`:
+  - Dereference rsi and move whatever there is to `reg`.
+  - Move (or add) rsi, word-aligned, i.e `rsp++` or `add rsp, 8`
+
+Lets go back.
+
+Referrring to the old squaring program we have written, 
+
+```asm
+.intel_syntax noprefix
+
+.section .text
+.global _start
+
+square:
+  push rbp            # prologue start, save old base pointer
+  mov rbp, rsp        # establish new base pointer, prologue end
+
+  mov rax, rdi        # copy argument to rax
+  imul rax, rdi       # rax = rdi * rdi
+  mov rsp, rbp
+  pop rbp             # epilogue
+  ret                 # return rax, the default place for for return
+
+_start:
+  mov rdi, 15         # argument: n = 15
+  call square         # call the procedure
+  mov rdi, rax        # move result to rdi for exit
+  mov rax, 60         # syscall: exit
+  syscall
+
+```
+
+the first thing we did was calling the square procedure.
+  - It means, "set the instruction pointer register to point at the `square` label and make an unconditional jump to square".
+  - Why this? If we never tell the instruction pointer to go to `square`, it will never go there and instead, will exit the program, as specified.
+  - That's why the `call` keyword is a shorthand for doing three things:
+    1. Push the return address to the stack.
+    2. Set the instruction pointer register to the square label, and 
+    3. Make an unconditional jump to the label.
+  - Therefore, the first thing that goes on the stack, or the lowest plate in the stack of plates is the "return address."
+
+Next comes the label itself, `square`.
+  - We have pushed `rbp` to stack. Why?
+    - So that we can save the base pointer of the caller.
+  - Who is the caller? The program.
+  - Why to save the caller's base pointer?
+    - Lets revisit the definition of base pointer.
+    - A base pointer is a fixed pointer, which marks the start of a stack frame.
+    - Among thousands of other processes, that are using stack, our program is just another.
+    - The stack pointer is volatile as it moves with push and pop operations, that are happening continuously. Therefore, relying on that is not viable.
+    - There is a requirement for a fixed offset, which can act as an anchor in the sea of operations.
+    - And `rbp` is that anchor.
+    - Our main program relies on rbp so that it knows where it was started. It marks the start of the stack frame, allotted to our asm program.
+    - But now we are creating another stack frame with our `square` procedure. Just think about this, how we are going to restore to the main context, or stack for the main program?
+    - I hope your answer was "using base pointer." If not, we'll systematically prove it.
+  - Therefore, the second thing that goes on the stack, or the second plate in the stack of plates is the "old base pointer."
+
+Now we have moved rsp into rbp.
+  - `rsp` is storing the memory reference to the top most thing that is living on the stack.
+  - And this is where our new stack frame, the one for the square procedure starts.
+  - Now this stack frame must also have its own frame pointer or rbp? Absolutely. And that is why, we are moving rsp into rbp.
+  - This makes rbp pointing at the first thing in the stack, which is the old base pointer.
+  - The new base pointer points at old base pointer. This might seem odd but later its significance will be proven.
+
+Next, arithmetic. Leave that.
+
+Next we have moved rbp into rsp.
+  - This means that rsp now points to rbp, or, the first thing in the stack, which is the old base pointer.
+  - Just imagine if we didn't have rbp for this stack frame. There is no straightforward way we can go back to the bottom.
+
+At last, we have popped rbp. Lets understand this.
+  - `rbp` for the current stack frame points to the old base pointer.
+  - When we do `pop reg`, it means that dereference what rsi is pointing to, store it in `reg`, and increase rsi.
+    ```
+    mov reg, [rsi]
+    inc rsi
+    ```
+  - Now rsi is pointing at the return address
+  - And `ret` does this: `pop rip`, dereference rsi, store it in rip, and increase rsi.
+  - Done.
+
+Having rbp pointing to the old base pointer, which was pushed to the stack as the second plate was necessary so that when we pop rsi, we directly move to the return address. And pop the return address to move to the main context.
+
+But it's not over yet. There is a conceptual problem that is left to be tackled.
+
+Stack grows downward, but the pointer arithmetic we are doing, to access everything on the top of the stack is using +, not -.
+  - `rbp + 8` is giving us the return address.
+  - `rbp - 8` is giving us the locals.
+  - And `rbp + 16` onwards we get the arguments pushed on the stack.
+
+What the heck we are actually doing!
+  - Locals are the values that we push to the stack inside a procedure.
+  - Space has to be reserved so that they can be stored and accessed properly.
+  - The first 6 function arguments comes in the form of registers, if it exceeds, goes to the stack, from [rbp + 16] onwards.
+  - The whole lies in how the stack is structured inside the memory vs how we interpert it.
+  - Stack grows downwards is the biggest problematic statement about stack, in my opinion. It forces me to invert my thinking about stack.
+
+Actually, according to memory, stack grows like this:
+
+```
+Higher Memory
+----x---x----
+
+1000        <-- Top of the stack, rsi
+0992        <-- return address
+0984        <-- old base pointer
+0976
+.
+.
+.
+.
+0024
+0016
+0008
+0000
+
+Lower Memory
+----x---x----
+```
+
+For every push, `rsi--` happens, and for every pop, `rsi++` happens.
+
+Functionally, return address goes first and then goes the old base pointer.
+
+After this comes function arguments and local variables.
+
+The case with function arguments is that if they are less than 7, they go in their individual registers. If they exceed the mark of 6, the rest of the arguments go on the stack, which is functionally below rbp or 0984.
+
+Conceptually we say that word-aligned addition to rbp gives access to arguments, while word-aligned subtraction to rbp gives access to locals.
+
+The problem is they are functionally the same thing. Just their interpretation makes them complicated.
+
+To store locals, you have to reserve space, by subtracting rsp. On the other hand, arguments > 6 are internally managed by stack.
+
+Mathematically,
+  - we are still doing [rbp - 8] to access the 7th argument. Because that's where it lives, i.e at 9976.
+  - If there is no 7th argument, and there is a local, we are still doing [rbp - 8], because that's where it lives, i.e at 9976.
+  - If there was both an argument and a local, the rsp would point at 9976, and subtracting 1 time will make space for a local, and the local would be at 9968.
+  - According to pointer arithmetic, addition gives access to arguments while subtraction gives access to locals. This is the thing.
+  - Mathematically, we are doing the same thing, subtracting from the offset.
