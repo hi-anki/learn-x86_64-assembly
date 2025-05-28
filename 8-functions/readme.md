@@ -140,12 +140,12 @@ I have used `rdi` for storing file descriptors. If I recall, a file descriptor i
   - A `read` syscall, which is used to take read input from the terminal, uses 0 as file descriptor. Here, 0 reflects the console which is the point where the input would be taken from.
 
 `rsp` is the stack pointer. It is meant for storing the top of the stack.
-  - Remember having `top` pointer in C, when I was writing simple stack implementation using arrays? `rsi` is the same thing.
+  - Remember having `top` pointer in C, when I was writing simple stack implementation using arrays? `rsp` is the same thing.
 
 Constant `push` and `pop` operations makes `rsp` volatile to store the base of the stack, which is the first thing in the stack. Assume the base as the first element in an array, which is meant to mimic a stack.
   - Remember doing `top++`? Initially, top was at -1. Doing `++` makes it move to the next byte (1, 2, 4, 8; depending on the data type).
-  - Now `rsi` is meant to store the `top`. It has nothing to do with the bottom. Even `rsi` don't know it is storing the top of a stack. It is just storing a memory address.
-  - What if `rsi` is decremented so much that it passed the stack frame? There is no guardrails, because there is no need for them. Memory is flat.
+  - Now `rsp` is meant to store the `top`. It has nothing to do with the bottom. Even `rsp` don't know it is storing the top of a stack. It is just storing a memory address.
+  - What if `rsp` is decremented so much that it passed the stack frame? There is no guardrails, because there is no need for them. Memory is flat.
   - How will I know I have reached the bottom of the stack?
   - There has to be something, that is fixed to the bottom of the stack, beyond which, the stack frame is no more.
   - This gives birth to `rbp`, which is the base pointer of the stack.
@@ -250,12 +250,12 @@ Higher Memory
 ## Meaning Of `push` And `pop`
 
 `push`:
-  - Subtracts rsi, word-aligned, i.e `rsp--` or `sub rsp, 8`, to make space for the value to be put on the stack.
-  - Dereference rsi and put the value at that location, i.e `[rsi] = imm/reg` or `mov [rsi], imm/reg`
+  - Subtracts `rsp`, word-aligned, i.e `rsp--` or `sub rsp, 8`, to make space for the value to be put on the stack.
+  - Dereference `rsp` and put the value at that location, i.e `[rsp] = imm/reg` or `mov [rsp], imm/reg`
 
 `pop reg`:
-  - Dereference rsi and move whatever there is to `reg`.
-  - Move (or add) rsi, word-aligned, i.e `rsp++` or `add rsp, 8`
+  - Dereference `rsp` and move whatever there is to `reg`.
+  - Move (or add) `rsp`, word-aligned, i.e `rsp++` or `add rsp, 8`
 
 ## Map The Procedure With Prologue And Epilogue
 
@@ -318,11 +318,11 @@ First we mov rbp into rsp.
 Next we pop rbp. This is important.
   - `rbp` for the current stack frame points to the old base pointer.
   - Popping `rbp` saves the old base pointer in `rbp`.
-  - And now the rsi is pointing at the return address, ready to go back to the previous context.
+  - And now the `rsp` is pointing at the return address, ready to go back to the previous context.
 
 Last, we do the return. `ret` means:
   1. `pop rip`, 
-  2. Dereference rsi, store it in rip, and increase rsi.
+  2. Dereference `rsp`, store it in rip, and increase `rsp`.
 
 We are back into the old stack frame, we have made the return to the previous context, what else is left? We have learned functions in assembly.
 
@@ -346,7 +346,7 @@ According to memory, stack grows like this:
 Higher Memory
 ----x---x----
 
-1000        <-- Top of the stack, rsi
+1000        <-- Top of the stack, rsp
 0992        <-- return address
 0984        <-- old base pointer
 0976        <-- Locals
@@ -363,7 +363,7 @@ Lower Memory
 ----x---x----
 ```
 
-For every push, `rsi--` happens, and for every pop, `rsi++` happens.
+For every push, `rsp--` happens, and for every pop, `rsp++` happens.
 
 Functionally, return address goes first and then goes the old base pointer.
 
@@ -375,7 +375,7 @@ Conceptually we say that word-aligned addition to rbp gives access to arguments,
 
 The problem is they are functionally the same thing. Just their interpretation makes them complicated.
 
-To store locals, you have to reserve space, by subtracting rsp. This is done because if there are more than 6 arguments, they go on stack. And this magic of managing stack happens automatically. So the rsi is pointing at those arguments and not on rbp, which you can reduce and do the thing.
+To store locals, you have to reserve space, by subtracting rsp. This is done because if there are more than 6 arguments, they go on stack. And this magic of managing stack happens automatically. So the rsp is pointing at those arguments and not on rbp, which you can reduce and do the thing.
 
 Mathematically,
   - we are still doing [rbp - 8] to access the 7th argument. Because that's where it lives, i.e at 9976.
