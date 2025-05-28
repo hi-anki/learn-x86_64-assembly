@@ -326,60 +326,41 @@ Last, we do the return. `ret` means:
 
 We are back into the old stack frame, we have made the return to the previous context, what else is left? We have learned functions in assembly.
 
-## Upcoming Conflict
+## Mgmt Of 7th Argument & Locals (Tripped Me The Most)
 
-Stack grows downward, but the pointer arithmetic we are doing, to access everything on the top of the stack is using +, not -.
-  - `rbp + 8` is giving us the return address.
-  - `rbp - 8` is giving us the locals.
-  - And `rbp + 16` onwards we get the arguments pushed on the stack.
+If there are more than 6 arguments, arguments 7th onwards go on stack. Understanding their mgmt is also necessary.
 
-What the heck is happening!
-  - Locals are the values that we push to the stack inside a procedure.
-  - Space has to be reserved so that they can be stored and accessed properly.
-  - The first 6 function arguments comes in the form of registers, if they exceed, they go on stack, from [rbp + 16] onwards.
-  - The problem is how the stack is structured inside the memory vs how we interpert it.
-  - "Stack grows downwards" is the biggest problematic statement about stack, in my opinion. It forces me to invert my thinking about stack.
+They are stored before the stack frame is even created.
 
-According to memory, stack grows like this:
-
-```
-Higher Memory
-----x---x----
-
-1000        <-- Top of the stack, rsp
-0992        <-- return address
-0984        <-- old base pointer
-0976        <-- Locals
-.
-.
-.
-.
-0024
-0016
-0008
-0000
-
-Lower Memory
-----x---x----
+First we have to reduce rsp so that we can save space for the 7th argument.
+```asm
+sub rsp, 8
 ```
 
-For every push, `rsp--` happens, and for every pop, `rsp++` happens.
+Now we put it there:
+```asm
+mov [rsp], 7
+```
 
-Functionally, return address goes first and then goes the old base pointer.
+Now the stack is like this:
+```
+1000    <-- Not used
+0992    <-- 7
+```
 
-After this comes function arguments and local variables.
+After call:
+```
+1000    <-- Not used
+0992    <-- 7
+0984    <-- return address
+```
 
-The case with function arguments is that if they are less than 7, they go in their individual registers. If they exceed the mark of 6, the rest of the arguments go on the stack, which is functionally below rbp or 0984.
+After pushing rbp:
+```
+1000    <-- Not used
+0992    <-- 7
+0984    <-- return address
+0976    <-- old rbp
+```
 
-Conceptually we say that word-aligned addition to rbp gives access to arguments, while word-aligned subtraction to rbp gives access to locals.
-
-The problem is they are functionally the same thing. Just their interpretation makes them complicated.
-
-To store locals, you have to reserve space, by subtracting rsp. This is done because if there are more than 6 arguments, they go on stack. And this magic of managing stack happens automatically. So the rsp is pointing at those arguments and not on rbp, which you can reduce and do the thing.
-
-Mathematically,
-  - we are still doing [rbp - 8] to access the 7th argument. Because that's where it lives, i.e at 9976.
-  - If there is no 7th argument, and there is a local, we are still doing [rbp - 8], because that's where it lives, i.e at 9976.
-  - If there was both an argument and a local, the rsp would point at 9976, and subtracting 1 time will make space for a local, and the local would be at 9968.
-  - According to pointer arithmetic, addition gives access to arguments while subtraction gives access to locals. This is the thing.
-  - Mathematically, we are doing the same thing, subtracting from the offset.
+Now we subtract more to have space for locals. And that's how this game of stack works. Why word-aligned addition to rbp gives 7th argument onwards and why word-aligned subtraction to rbp gives locals.
