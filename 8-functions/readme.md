@@ -364,3 +364,59 @@ After pushing rbp:
 ```
 
 Now we subtract more to have space for locals. And that's how this game of stack works. Why word-aligned addition to rbp gives 7th argument onwards and why word-aligned subtraction to rbp gives locals.
+
+# An Edge Case
+
+So far, all the pointer arithmetic we have done is based on multiples of 8.
+
+A push operation decreases `rsp` by 8, while a pop operation increases `rsp` by 8. All that is correct.
+
+But the convention we use on x86_64 linux, System V ABI AMD64, mandates `rsp` to be in multiple of 16.
+  - It means that whatever memory location it points to, it must be divisible by 16.
+  - But our mental model is about 8, right?
+  - Actually, the reason behind this is kinda cryptic to understand for now. It is related to SIMD instructions, where they expect `rsp` to be 16-bytes aligned.
+  - And therefore, System V has made it mandatory for rsp to be 16-bytes aligned. It doesn't matter if you use that one extra 8-bytes block. You can leave it empty.
+  - But always keep `rsp` 16-bytes aligned, to avoid any undefined behavior.
+
+How do we know that `rsp` is pointing at a memory location, which is divisible by 16?
+  - This is always managed internally.
+  - Before calling any procedure, we always receive a 16-bytes aligned `rsp`.
+
+Once the return address is pushed on the stack, rsp now becomes 8-bytes aligned. But immediately we push rbp on stack, which makes it 16-bytes aligned again.
+
+Let's see the updated memory layout:
+```
+1008        <--  Top (`rsp`), divisible by 16
+1000        <--  Return Address (pushed by procedure call)
+0992        <--  old rbp
+
+rsp = 0992
+```
+
+If there is a 7th argument, it goes on stack.
+```
+1008        <--  Top (`rsp`), divisible by 16
+1000        <--  Arg7
+0992        <--  Return Address (pushed by procedure call)
+0984        <--  old rbp
+
+rsp = 0984
+```
+
+Now `rsp` points at 0984, which is divisible by 8, not 16. For proper compatibility with System V, it is necessary to keep rsp 16-bytes aligned.
+  - Thus, we'll do `rsp--` or `sub rsp, 8`
+
+The stack layout becomes:
+```
+1008        <--  Top (`rsp`), divisible by 16
+1000        <--  Arg7
+0992        <--  Return Address (pushed by procedure call)
+0984        <--  old rbp
+0976        <--
+
+rsp = 0976
+```
+
+0976 is not filled with anything, but rsp now points to it, because it makes rsp compatible with System V, which avoids a whole class of problems, which currently we can't understand. But we will, very soon.
+
+And now this memory location is free to use. It is not some special piece. We can move a local there as well.
