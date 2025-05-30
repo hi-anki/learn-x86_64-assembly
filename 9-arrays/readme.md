@@ -84,3 +84,42 @@ All the 3 declarations are a pointer to a 40-bytes of zeroed memory.
   - And it can be treated as a qword-sized array, where we can store 5 distinct elements of 8 bytes each.
 
 Therefore, interpretation matters in case of uninitialised array.
+
+## Accessing Individual Elements
+
+Since it's all about continuous memory blocks, the memory address of any element can be obtained via a standard formula, which is:
+
+```
+Address of i'th element = base_address + (i * element_size) 
+```
+> Here, base address is the memory location at which the first element in the array is stored.
+> i denotes the position of element we want to see.
+
+Before we go about accessing elements, I want to know why every language follows 0-based indexing. Why the first element is at 0, not 1?
+
+### 0-based Indexing Rule
+
+We write `arr[i]` to access the ith element. But `arr[i]` is just a high-level construct, because we don't use [] like that at low-level. So what does `arr[i]` resolves to?
+
+`arr[i]` is same as `(arr + i*size)`
+
+Even in C, internally, arr is just a pointer to the first item in the array.
+
+If we want to access the first element through pointer dereferncing directly, it should be `*(arr)`, right? Because `arr` is already pointing at the first element. Lets test this with 0-based indexing and 1-based indexing.
+  + In 0-based indexing, first element is at 0-th position. So to obtain the first element, we have to write: `*(arr + 0*4)`, which gives us `*(arr)`, which is what we wanted.
+  + In 1-based indexing, first element is at 1-th position. So to obtain the first element, we have to write: `*(arr + 1*4)`, which gives us `*(arr + 4)`, which is same as `[arr++]`. Is this what we wanted? NO.
+
+This proves that 0-based indexing is not just a design decision, but a logical decision as well.
+
+Take this:
+```asm
+.section .data
+  arr: .byte 1, 2, 3, 4
+```
+
+Let's assume the array starts at 1000.
+  - The first thing we need to do is to load the effective address of arr into rsi.
+    ```asm
+    lea rsi, arr
+    ```
+  - Now we can dereference rsi to obtain the elements. Checkout [static-array.asm](./static-array.asm) and tweak `mov rdi, [arr + 3]` from 0-3.
