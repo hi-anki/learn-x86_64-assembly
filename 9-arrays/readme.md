@@ -52,8 +52,35 @@ void main(){
 | dword | `.long`       | 4            | `mov eax, [addr]` |
 | qword | `.quad`       | 8            | `mov rax, [addr]` |
 
+----
+
 Before we go about uninitialised arrays, lets understand and clarify certain things.
 
 First, we will understand [scopes](./scope.md).
 
 Next we will introduce [symbols and the difference b/w labels and symbols](./symbols.md).
+
+Now we are ready to understand uninitialised array definition.
+
+## Uninitialised Arrays
+
+GAS provides three ways to do this:
+  1. `.skip`
+  2. `.comm`
+  3. `.lcomm`
+
+```asm
+.section .bss
+  buff1: .skip 40
+  .lcomm buff2, 40
+  .comm buff3, 40
+```
+> All are same, except the difference that we have read in scopes and symbols. But right now, all of them are just the same thing.
+
+All the 3 declarations are a pointer to a 40-bytes of zeroed memory.
+  - It can be treated as a byte-sized array, where we can store 40 distinct elements of 1 byte each.
+  - It can be treated as a word-sized array, where we can store 20 distinct elements of 2 bytes each.
+  - It can be treated as a dword-sized array, where we can store 10 distinct elements of 4 bytes each.
+  - And it can be treated as a qword-sized array, where we can store 5 distinct elements of 8 bytes each.
+
+Therefore, interpretation matters in case of uninitialised array.
