@@ -53,3 +53,5 @@ void main(){
 | qword | `.quad`       | 8            | `mov rax, [addr]` |
 
 Before we go about uninitialised arrays, lets understand and clarify certain things.
+
+First, we will understand [scopes](./scope.md).
