@@ -85,6 +85,8 @@ All the 3 declarations are a pointer to a 40-bytes of zeroed memory.
 
 Therefore, interpretation matters in case of uninitialised array.
 
+Note: At runtime, the kernel zeroes out this region.
+
 ## Accessing Individual Elements
 
 Since it's all about continuous memory blocks, the memory address of any element can be obtained via a standard formula, which is:
