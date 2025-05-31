@@ -2,6 +2,8 @@
 
 Hi, Ankur here! Welcome to x86 assembly.
 
+### Note: The Work Is In Progress
+
 # Straightforward FAQ
 
 Which flavour of assembly?
