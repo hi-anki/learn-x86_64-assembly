@@ -14,7 +14,7 @@ The best thing we can do is to take a hybrid approach.
 
 Lets get going.
 
-# Memory (RAM)
+## Memory (RAM)
 
 Imagine a room inside of a bank, full of personal-lockers. All of these lockers exhibit some properties, like:
   1. Same size and color,
@@ -31,9 +31,9 @@ Similarly, memory is a huge collection of boxes, which have common properties, l
 Just as the bank locker can't identify if it is a jwellery or a photo, everything is identified as a valuable, memory also contains numbers only. The interpretation of these numbers make them a literal digit, an alphabet, or an emoji.
   - And this is where we will learn about context and interpretations.
 
-# CPU
+## Central Processing Unit or CPU
 
-CPU or Central Processing Unit, is the physical component that actually executes instructions.
+CPU is the physical component that actually executes instructions.
 
 While modern systems are very complex, the role of CPU is quite simple: fetch, decode, and execute instructions stored in memory. And this what a **fetch-execute** cycle is.
 
@@ -59,7 +59,7 @@ At last, the **Arithmetic and Logic unit**. The data and the decoded instruction
 
 And these are the core elements of the CPU.
 
-## Fetch-Execute Cycle
+### Fetch-Execute Cycle
 
 1. **Fetch** – Read the instruction from memory (address held in instruction pointer).
 2. **Decode** – Understand what the instruction means.
@@ -69,7 +69,7 @@ And these are the core elements of the CPU.
 
 And this happens billions of times.
 
-# Registers
+## Registers
 
 In addition to the memory on the outside of the processor, the processor itself has some special, high-speed memory locations called registers.
 
@@ -93,7 +93,7 @@ The size or the width of the register depends on the architecture.
   + Word size is the size of the data that the CPU works with.
   + It's the number of bits the CPU processes at once as a single "unit" or "word".
 
-# Wait, What Is This 32-bit && 64-bit?
+## Wait, What Is This 32-bit && 64-bit?
 
 We download softwares. If that's a technical software, it is always mentioned whether you are at 32-bit or 64-bit OS. And there are different softwares for both.
 
