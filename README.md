@@ -83,6 +83,8 @@ In the end,
   - This project itself is not aimed for perfect people.
   - It aims at imperfects like me.
 
+If you are up, lets begin our journey. Here you can find the [curriculum](./CURRICULUM.md), the structure we are going to be referring to to learn assembly.
+
 # References
 
 + ChatGPT, by OpenAI
