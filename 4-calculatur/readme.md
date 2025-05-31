@@ -246,11 +246,11 @@ Accurately, sign extension is the process of copying the sign bit of a smaller s
 
 Now how it is done?
 
-| Mnemonic | Meaning                    | Sign-extends from | To        | Used Before             |
-| -------- | -------------------------- | ----------------- | --------- | ----------------------- |
-| `cwd`    | Convert Word to Doubleword | `AX`              | `DX:AX`   | 16-bit `idiv`           |
-| `cdq`    | Convert Double to Quadword | `EAX`             | `EDX:EAX` | 32-bit `idiv`           |
-| `cqo`    | Convert Quad to Octoword   | `RAX`             | `RDX:RAX` | 64-bit `idiv`           |
+| Mnemonic | Meaning                                   | Sign-extends from | To        | Used Before             |
+| -------- | ----------------------------------------- | ----------------- | --------- | ----------------------- |
+| `cwd`    | Convert Word to Doubleword, sign-extended | `AX`              | `DX:AX`   | 16-bit `idiv`           |
+| `cdq`    | Convert Double to Quadword, sign-extended | `EAX`             | `EDX:EAX` | 32-bit `idiv`           |
+| `cqo`    | Convert Quad to Octoword, sign-extended   | `RAX`             | `RDX:RAX` | 64-bit `idiv`           |
 
 These are all one-operand instructions — they read from the lower register and sign-extend into the upper half of the dividend pair.
 
