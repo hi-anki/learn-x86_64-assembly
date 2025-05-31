@@ -18,6 +18,9 @@ Which platform?
 Which assembler?
   - GNU `as`
 
+Code editor (IDE)?
+  - I prefer VSCode, but it doesn't matter which IDE you use.
+
 What are the prerequisites?
   - Basic mathematics (addition, subtraction, multiplication, division)
   - Understanding of basic programming concepts (variables, data types, size, control flow, iteration, functions, arrays and strings) in at least in python or C. If any other language, no problem.
