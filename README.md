@@ -93,3 +93,5 @@ If you are up, lets begin our journey. Here you can find the [curriculum](./CURR
 + [x64 Cheat Sheet, Brown University](https://cs.brown.edu/courses/cs033/docs/guides/x64_cheatsheet.pdf)
   + It is really good in the way it has consolidated information in just 10 pages. A good reference.
   + Note: It is GAS and AT&T specific. But the fundamentals remains the same.
+
++ [A Complete List Of Instruction Set On x86_64](https://www.felixcloutier.com/x86/)
