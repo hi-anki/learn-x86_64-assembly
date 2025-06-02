@@ -37,6 +37,7 @@ Why to choose this repository to learn over others?
     - At times, you will find yourself just repeating one single thing two-three times, until it becomes your second nature.
   - It has got a curriculum, not the best one, but the one I thought I had, because I started with the same prerequisites. Stricitly, I only had basic programming knowledge + other surface level tech knowledge, which everyone posses these days.
   - It has got no links to external page, becuase this spirals me. I have everything that is required you to learn consolidated in one single page. No links to other pages.
+  - The reference section in other courses often trips me up, because I can't read all the references. Therefore, I have strictly tried to keep references to the point.
   - I have designed it to be the one-resource I need to learn all the assembly that is required to hop on RE/BE pathway.
 
 Why not to choose this repository to learn over others?
