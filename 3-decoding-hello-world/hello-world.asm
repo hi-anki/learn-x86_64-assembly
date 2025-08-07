@@ -1,4 +1,5 @@
 # GAS assembler by default uses AT&T syntax. This is how we convey it to use the Intel syntax
+
 .intel_syntax noprefix
 
 # marks the start of data section
