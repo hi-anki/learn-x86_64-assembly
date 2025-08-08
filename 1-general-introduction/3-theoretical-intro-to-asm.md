@@ -38,20 +38,9 @@ When **Linux** was created in **1991**, it relied heavily on GNU tools like **GC
 
 ## Which Syntax We Are Going To Be Using?
 
-Intel, because it is less chaotic.
+We are learning assembly, not syntaxes. The only thing that matters here is an assembler. Because an assembly code heavyily uses assembler directives. That's it.
 
-## Does That Affect Our Understanding Of Assembly?
-
-No.
-
-## Doesn't That Limit Us Or Blind Us To AT&T Syntax?
-
-No.
-
-## What Should I Know Before Hand About This?
-
-The only thing that concerns us is the syntax for an instruction.
-
+We will write intel syntax in GAS. Because, the operand style matches the mathematical style, LHS = RHS.
 ```
 // Intel
 mnemonic destination, source
@@ -60,7 +49,7 @@ mnemonic destination, source
 mnemonic source, destination
 ```
 
-What are these? This is the next topic.
+**Learn Assembly, Not Syntaxes.**
 
 # Difference Between Assembly And Other Languages (C, Python.....)
 
