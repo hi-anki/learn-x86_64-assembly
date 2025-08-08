@@ -1,51 +1,91 @@
 # Reading Input From The User
 
-1. `.bss` section refers to uninitialisied data. Here, reading from stdin is uninitialisied because it will be done on runtime. Therefore, rather putting it in data section, we put it into `.bss` because data expects statically defined values.
+## Why stdin goes in .bss and not in .data section?
 
-2. `buffer` is a user-defined label which is reserving number of bytes for the stdin.
-3. `.skip` is a GAS directive used to reserve uninitialized space by skipping N-bytes.
+`.bss` section is the place for uninitialisied data.
 
-4. Put read syscall in rax, which is 0.
-5. Set the file descriptor to 0, for stdin in rdi (arg 1).
-6. Load effective address of the buffer, where we will read, in rsi (arg 2).
-7. Set rdx with the number of bytes to read (arg 3).
-8. Invoke the syscall, read from console.
+The allocation in .bss is zero-initialized at runtime. Why can't we just zero initialize the memory locations ourselves in the .data section only?
 
-With that in mind, read syscall would look like: `read(fd, buffer, bytes)
+`.data` section holds static and global variables, which are already initialized. This directly affects the size of the binary.
 
-8. Now, put the write syscall in rax, which is 1.
-9. Set the file descriptor to 1, for stdout in rdi (arg 1).
-10. Load the buffer to write from in rsi. We haven't used `offset` here because it works on assembly-time. `lea` on the the other hand is a CPU instruction.
-11. Set the number of bytes to write, in rdx. This is the most interesting and learnable part here.
-    + We are not using 100 or buffer directly because it was the complete buffer length that could be read from stdin.
-    + Meaning, stdin was prepared to read 100 bytes but it is not necessary that the user will enter 100 bytes completely. It might enter less.
-    + In that case, it will fail. But because we are using rax, therefore, it will not.
-    + How? read syscall will return the number of bytes read from stdin. We know return value by convention goes into rax (it's callee-managed). rax has the effective number of bytes, which we need.
-12. Invoke the syscall, print to console.
+When we allocate an array of size 100 bytes, zero-initialized in .data section, those 100 bytes are basically excess space, because they aren't used right away. We have to populate them before using.
 
-13. Exit syscall.
+Those 100 bytes could also have been allocated directly at runtime, reducing the size of the overall binary? This is the whole idea behind the existence of `.bss` and why stdin goes in `.bss` not `.data`.
 
-# `lea` Instruction
+## Reserve Space
 
-+ This is something new here. Lets learn.
-+ It stands for "load effective address".
-+ It computes the address of a memory operand and loads it into a register — but it does not access the value at that memory address.
-+ It is like, "take the address of buffer, and store that in rsi."
-+ It is used when you want to pass a pointer to the data, not the data itself.
+`buffer` is a user-defined label which is reserving number of bytes for stdin.
 
-# But, Here Is A Problem
+`.skip` is a GAS directive used to reserve uninitialized space by skipping N-bytes.
 
-+ This will only print the first character or the first byte in the buffer. Lets test this.
-+ Now the reason behind this is rax is being over-written.
+## Setup Read Syscall
 
-+ After the read syscall is completed, it returned the effective bytes in rax.
-+ But we have set rax to 1 for write syscall. And that's how we have lost the effective number of bytes in the buffer.
-+ Solution? Move the instruction `mov rdx, rax` to just above the instruction where we are setting up rax for the write syscall. Like this:
-  ```asm
-  mov rdx, rax
-  mov rax, 1
-  .
-  .
-  ```
+The accumulator (`rax`) is setu for read syscall, which is 0.
 
-+ Now it will work perfect.
+The file descriptor (`rdi`) is set to 0, which is for stdin.
+
+Now we need the runtime address of the `buffer` label in the source index register (`rsi`). To obtain this, we use `lea` instruction, which stands for *load effective address*.
+
+Set rdx with the number of bytes to read (arg 3).
+
+Invoke the syscall and read from console.
+
+----
+
+With that in mind, read syscall would look like: `read(fd, buffer, bytes)`
+
+## Displaying The Input
+
+Setup rax for write syscall, 1.
+
+Set the file descriptor to 1, for stdout.
+
+Load the buffer to write from in rsi.
+
+Set the number of bytes to write in rdx.
+  - The question is, how we are going to know the length of our input?
+  - Because 100 is the maximum number of bytes that can be read, not necessarily the bytes we have read in total.
+
+### How to find the number of bytes being read?
+
+If we open the man page for `read` syscall, we can find this signature:
+```c
+ssize_t read(int fd, void buf[.count], size_t count);
+```
+If you are still unsure, lets look at the `RETURN VALUE` section.
+```
+On success, the number of bytes read is returned (zero indicates end of file), and the file position is advanced by this number.
+```
+
+Now it is confirmed that the number of bytes read is returned, but where? As this is a C wrapper on the actual syscall!
+
+If you go back to the calling convention [article](../2-practical-introduction/2-calling-conventions.md), you can find that `rax` is where the result of a syscall is returned.
+  - We can also verify this by visiting the System V ABI documentation.
+  - Visit this gitlab repo, [x86-64 psABI](https://gitlab.com/x86-psABIs/x86-64-ABI).
+  - Search for "Download latest PDF" and open the link.
+  - Check Appendix A, AMD64 Linux Kernel Conventions on page 146.
+  - Point number 5 reads as: *Returning from the syscall, register %rax contains the result of the system-call. A value in the range between -4095 and -1 indicates an error, it is -errno*
+
+That's why we are setting up rdx before setting the accumulator for write syscall.
+
+Invoke the syscall, print to console.
+
+Exit syscall. And we are done.
+
+## What is `lea` and Why is `lea`?
+
+It stands for "load effective address".
+
+It computes the address of a memory operand and loads it into a register, but it never access the value at that memory address.
+
+Why we haven't used `offset`? 
+  - Remeber assembly-time v/s runtime constraints? That's the reason.
+  - `offset` is an assembler directive. It replaces the label with a virtual address or offset. It doesn't resemble the actual runtime address of that label (symbol).
+  - `lea` is a CPU instruction which specializes in finding the runtime memory address of a label.
+
+Lets talk about an undefined behavior here.
+  - Right now we don't know how memory is managed, so we don't know what an offset, virtual address or anything else actually mean.
+  - Sometimes, just using `offset` with mov can perfectly work. But, its not guaranteed.
+  - This undefined behavior exists when that offset or virtual address is mapped as it is in the actual memory, which in todays world is almost impossible if you use production-grade principles.
+  - ASLR exists to eliminate such possibilities. ASLR stands for address space layout randomization. But we need not to know about it.
+  - Just keep this in mind that `offset` might work but it is not right.

@@ -12,6 +12,18 @@ As long as we are out of these two contexts, we can use a register as we want. A
 
 ## General-Purpose Registers in x86_64
 
+| Argument   | Register | Description      |
+| ---------- | -------- | ---------------- |
+| Syscall #  | `rax`    | Identifier       |
+| Argument 1 | `rdi`    | First parameter  |
+| Argument 2 | `rsi`    | Second parameter |
+| Argument 3 | `rdx`    | Third parameter  |
+| Argument 4 | `r10`    | Fourth parameter |
+| Argument 5 | `r8`     | Fifth parameter  |
+| Argument 6 | `r9`     | Sixth parameter  |
+
+## Syscall Register Convention
+
 | Register | Purpose / Convention                  |
 | -------- | ------------------------------------- |
 | `rax`    | Accumulator; return values, syscall # |
@@ -28,19 +40,7 @@ As long as we are out of these two contexts, we can use a register as we want. A
 | `r11`    | Temporary scratch for syscall         |
 | `r12`–`r15` | Callee-saved; general-purpose      |
 
-## Syscall Register Convention
-
 In Linux (x86_64), the most common calling convention is **System V AMD64 ABI**. It defines how functions and system calls exchange data by assigning specific roles to specific registers.
-
-| Argument      | Register | Description      |
-| ------------- | -------- | ---------------- |
-| Syscall #     | `rax`    | Identifier       |
-| Argument 1    | `rdi`    | First parameter  |
-| Argument 2    | `rsi`    | Second parameter |
-| Argument 3    | `rdx`    | Third parameter  |
-| Argument 4    | `r10`    | Fourth parameter |
-| Argument 5    | `r8`     | Fifth parameter  |
-| Argument 6    | `r9`     | Sixth parameter  |
 
 To successfully invoke a system call, our data must be placed in these registers accordingly. Otherwise, the kernel will not interpret our request correctly.
 
