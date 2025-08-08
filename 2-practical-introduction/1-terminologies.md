@@ -113,10 +113,40 @@ The newer systems are also backward compatible. This means that x86_32 still sup
 6. Base Pointer Addressing Mode.
    + This is similar to indirect addressing, but you also include a number called the offset to add to the register's value before using it for lookup.
 
-## System Calls (or Syscalls)
-
-There will be times when we'd require to interact with the operating system, like printing to the screen, reading user input, or managing files. This is done via system calls (or interrupts, in older systems).
-
 ----
 
 Always leave an empty line at end. This gracefully marks the end of assembly code. Otherwise, you'll get a warning by the assembler.
+
+# System Calls (or Syscalls)
+
+A **system call** is the controlled gateway between a user-space program and the kernel. It lets your code request services that require higher privileges — like writing to the screen, reading a file, or exiting the program.
+
+## User Mode vs Kernel Mode
+
+The CPU operates in two modes:
+  - **User Mode**: Restricted environment in which our code runs.
+  - **Kernel Mode**: Full-access mode where the operating system runs.
+
+Our program cannot perform privileged operations directly. Instead, it uses **syscalls** to request the kernel to perform them on its behalf.
+
+# Common Syscalls
+
+Linux supports hundreds of syscalls. Here are a few common ones:
+
+| Purpose            | Syscall | Syscall Number |
+| ------------------ | ------- | -------------- |
+| Read from a file   | `read`  | 0              |
+| Write to a file    | `write` | 1              |
+| Open a file        | `open`  | 2              |
+| Map memory         | `mmap`  | 9              |
+| Exit the program   | `exit`  | 60             |
+
+# Vairables v/s Labels
+
+A variable is a container to store a value. A label is a named memory location. Both are different.
+
+A label can point to a group of instructions, a constant value, a procedure, anything. But a variable only stores some value. It can store the result of a computation, but not the instruction itself.
+
+In simple terms, every variable is a label, but every label need not to be a variable.
+
+The difference will become more apparent when we will understand control flow.
