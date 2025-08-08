@@ -5,7 +5,6 @@
 .section .bss
   num1: .skip 2
   num2: .skip 2
-  result: .skip 2
 
 .section .data
   welcome_msg: .ascii "Welcome To x86_64 Calculator\n"
@@ -15,8 +14,8 @@
   op_len = . - op_msg_1
   op_msg_2: .ascii "Enter number 2: "
 
-  res_plus: .ascii "Num1 + Num2 = "
-  res_len = . - res_plus
+  res: .ascii "Num1 - Num2 = "
+  res_len = . - res
 
 .section .text
   .global _start
@@ -63,25 +62,24 @@
     movzx rcx, byte ptr [num2]
     sub rcx, '0'
 
-  # Step 7: Multiplication
-    mov rax, rbx
-    mul rcx
+  # Step 7: Subtraction
+    sub rbx, rcx        # rbx = rbx - rcx
 
   # Step 8: Convert the result from Integer to ASCII
-    add rax, '0'
-    mov [result], al
+    add rbx, '0'
 
   # Step 9: Display result msg
     mov rax, 1
     mov rdi, 1
-    mov rsi, offset res_plus
+    mov rsi, offset res
     mov rdx, res_len
     syscall
 
   # Step 10: Display resultant digit
     mov rax, 1
     mov rdi, 1
-    mov rsi, offset result
+    push rbx
+    mov rsi, rsp
     mov rdx, 1
     syscall
 

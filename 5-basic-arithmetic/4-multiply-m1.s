@@ -1,10 +1,11 @@
-# Take 2 numbers as input from the user and compute their division
+# Take 2 numbers and one operator as input from the user and compute the result
 
 .intel_syntax noprefix
 
 .section .bss
   num1: .skip 2
   num2: .skip 2
+  result: .skip 2
 
 .section .data
   welcome_msg: .ascii "Welcome To x86_64 Calculator\n"
@@ -14,8 +15,8 @@
   op_len = . - op_msg_1
   op_msg_2: .ascii "Enter number 2: "
 
-  res: .ascii "Num1 + Num2 = "
-  res_len = . - res
+  res_plus: .ascii "Num1 + Num2 = "
+  res_len = . - res_plus
 
 .section .text
   .global _start
@@ -62,26 +63,25 @@
     movzx rcx, byte ptr [num2]
     sub rcx, '0'
 
-  # Step 7: Division
-    mov al, bl
-    div cl
+  # Step 7: Multiplication
+    mov rax, rbx
+    mul rcx
 
   # Step 8: Convert the result from Integer to ASCII
-    add al, '0'
-    mov bl, al
+    add rax, '0'
+    mov [result], rax
 
   # Step 9: Display result msg
     mov rax, 1
     mov rdi, 1
-    mov rsi, offset res
+    mov rsi, offset res_plus
     mov rdx, res_len
     syscall
 
   # Step 10: Display resultant digit
     mov rax, 1
     mov rdi, 1
-    mov [rsp], bl
-    mov rsi, rsp
+    lea rsi, [result]
     mov rdx, 1
     syscall
 

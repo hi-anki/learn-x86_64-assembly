@@ -1,4 +1,4 @@
-# Take 2 numbers and one operator as input from the user and compute the result
+# Take 2 numbers as input from the user and compute their division
 
 .intel_syntax noprefix
 
@@ -62,11 +62,14 @@
     movzx rcx, byte ptr [num2]
     sub rcx, '0'
 
-  # Step 7: Addition
-    add rbx, rcx        # rbx = rbx + rcx
+  # Step 7: Division
+    xor rdx, rdx
+    mov rax, rbx
+    div rcx
 
   # Step 8: Convert the result from Integer to ASCII
-    add rbx, '0'
+    add rax, '0'
+    mov rbx, rax
 
   # Step 9: Display result msg
     mov rax, 1
@@ -78,7 +81,8 @@
   # Step 10: Display resultant digit
     mov rax, 1
     mov rdi, 1
-    mov rsi, rbx
+    push rbx
+    mov rsi, rsp
     mov rdx, 1
     syscall
 

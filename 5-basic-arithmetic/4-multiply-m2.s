@@ -67,8 +67,8 @@
     mul rcx
 
   # Step 8: Convert the result from Integer to ASCII
-    add al, '0'
-    mov bl, al
+    add rax, '0'
+    mov rbx, rax
 
   # Step 9: Display result msg
     mov rax, 1
@@ -80,11 +80,10 @@
   # Step 10: Display resultant digit
     mov rax, 1
     mov rdi, 1
-    mov [rsp], bl
+    push rbx
     mov rsi, rsp
     mov rdx, 1
     syscall
-    add rsp, 8
 
   # Exit
     mov rax, 60

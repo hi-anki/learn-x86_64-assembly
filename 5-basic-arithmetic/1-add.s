@@ -78,7 +78,7 @@
   # Step 10: Display resultant digit
     mov rax, 1
     mov rdi, 1
-    mov [rsp], bl
+    push rbx
     mov rsi, rsp
     mov rdx, 1
     syscall
